@@ -4,10 +4,26 @@
 #      run as hiseq.clinical 
 #      use screen or nohup
 #
-. /home/clinical/CONFIG/configuration.txt
+if [ -f "$1" ] ; then 
+  CONF=$1
+else
+  CONF=~/clinical.toml
+fi
 NOW=$(date +"%Y%m%d%H%M%S")
-exec > ${LOGDIR}backup${NOW}.log 2>&1
-echo "Variables read in from /home/clinical/CONFIG/configuration.txt"
+BKPLOG=backup.${NOW}.log
+echo ${CONF}
+if [ ! -f "${CONF}" ] ; then 
+  echo File ${CONF} not found
+  exit 9
+fi
+
+cat ${CONF} | grep -v "^#" | sed 's/ //g' $1 | sed 's/"//g' >> ${BKPLOG}
+. ${BKPLOG}
+echo ${LOGDIR} next
+mv ${BKPLOG} ${LOGDIR}
+exec >> ${LOGDIR}${BKPLOG} 2>&1
+
+echo "Variables read in from ${CONF}"
 echo "LOGDIR   -  ${LOGDIR}"
 echo "RUNBASE  -  ${RUNBASE}"
 echo "BACKUPDIR  -  ${BACKUPDIR}"
@@ -21,6 +37,9 @@ NOW=$(date +"%Y%m%d%H%M%S")
 echo "[${NOW}] [${RUNBASE}] Backup the older runs"
 runs=$(find ${RUNBASE} -maxdepth 1 -name "*D00*" -mtime +8 | awk 'BEGIN {FS="/"} {print $NF}')
 cd ${RUNBASE}
+
+exit 1
+
 bckps=0
 for run in ${runs[@]}; do
   echo "Will back up ${run}"
