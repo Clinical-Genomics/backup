@@ -38,8 +38,6 @@ echo "[${NOW}] [${RUNBASE}] Backup the older runs"
 runs=$(find ${RUNBASE} -maxdepth 1 -name "*D00*" -mtime +8 | awk 'BEGIN {FS="/"} {print $NF}')
 cd ${RUNBASE}
 
-exit 1
-
 bckps=0
 for run in ${runs[@]}; do
   echo "Will back up ${run}"
