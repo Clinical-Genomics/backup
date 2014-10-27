@@ -14,3 +14,6 @@
 . /home/clinical/CONFIG/configuration.txt
 NOW=$(date +"%Y%m%d%H%M%S")
 mysqldump clinstatsdb > ${BACKUPDIR}clinstatsdb_${NOW}.sql
+
+scp ${BACKUPDIR}clinstatsdb_${NOW}.sql rasta:/mnt/hds/proj/bioinfo/BACKUP/clinstatsdb_${NOW}.sql
+
