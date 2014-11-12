@@ -38,7 +38,7 @@ cnx = mysql.connect(user=params['CLINICALDBUSER'], port=int(params['CLINICALDBPO
                     passwd=params['CLINICALDBPASSWD'], db=params['STATSDB'])
 cursor = cnx.cursor()
 
-print ("\n\tFC: "+fcname+"    DATABASE IS csdb_test\n")
+print ("\n\tFC: "+fcname+"    DATABASE IS "+params['STATSDB']+"\n")
 
 cursor.execute(""" SELECT project.projectname, flowcell.flowcellname, sample.samplename, unaligned.lane, 
 unaligned.readcounts, unaligned.yield_mb, TRUNCATE(q30_bases_pct,2), TRUNCATE(mean_quality_score,2),
