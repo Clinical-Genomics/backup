@@ -15,7 +15,7 @@ _MINOR_ = 0
 _PATCH_ = 0
 
 if (len(sys.argv)>1):
-  basedir = sys.argv[1]
+  fcname = sys.argv[1]
 else:
   message = ("usage: "+sys.argv[0]+" <flowcell-name> <config_file:optional>")
   sys.exit(message)
