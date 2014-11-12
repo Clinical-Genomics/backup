@@ -35,7 +35,7 @@ with open(configfile, "r") as confs:
 
 now = time.strftime('%Y-%m-%d %H:%M:%S')
 cnx = mysql.connect(user=params['CLINICALDBUSER'], port=int(params['CLINICALDBPORT']), host=params['CLINICALDBHOST'], 
-                    passwd=params['CLINICALDBPASSWD'], db=params['CLINSTATSDB'])
+                    passwd=params['CLINICALDBPASSWD'], db=params['STATSDB'])
 cursor = cnx.cursor()
 
 print ("\n\tFC: "+fcname+"    DATABASE IS csdb_test\n")
