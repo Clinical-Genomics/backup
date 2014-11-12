@@ -9,14 +9,24 @@ import time
 import glob
 import re
 
-if len(sys.argv) == 2:
-   fcname = sys.argv[1]
-else:
-  print ("\n\tUsage: "+sys.argv[0]+" flowcell\n")
-  exit()
+# this script is written for database version:
+_MAJOR_ = 1
+_MINOR_ = 0
+_PATCH_ = 0
 
+if (len(sys.argv)>1):
+  basedir = sys.argv[1]
+else:
+  message = ("usage: "+sys.argv[0]+" <flowcell-name> <config_file:optional>")
+  sys.exit(message)
+
+configfile = "/home/hiseq.clinical/.scilifelabrc"
+if (len(sys.argv)>2):
+  if os.path.isfile(sys.argv[2]):
+    configfile = sys.argv[2]
+    
 params = {}
-with open("/home/hiseq.clinical/.scilifelabrc", "r") as confs:
+with open(configfile, "r") as confs:
   for line in confs:
     if len(line) > 5 and not line[0] == "#":
       line = line.rstrip()
