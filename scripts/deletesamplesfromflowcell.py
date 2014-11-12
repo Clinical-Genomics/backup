@@ -24,7 +24,8 @@ with open("/home/hiseq.clinical/.scilifelabrc", "r") as confs:
       params[pv[0]] = pv[1]
 
 now = time.strftime('%Y-%m-%d %H:%M:%S')
-cnx = mysql.connect(user=params['CLINICALDBUSER'], port=int(params['CLINICALDBPORT']), host=params['CLINICALDBHOST'], passwd=params['CLINICALDBPASSWD'], db='csdb_test')
+cnx = mysql.connect(user=params['CLINICALDBUSER'], port=int(params['CLINICALDBPORT']), host=params['CLINICALDBHOST'], 
+                    passwd=params['CLINICALDBPASSWD'], db=params['CLINSTATSDB'])
 cursor = cnx.cursor()
 
 print ("\n\tFC: "+fcname+"    DATABASE IS csdb_test\n")
