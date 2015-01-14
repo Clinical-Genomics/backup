@@ -41,6 +41,7 @@ cd ${RUNBASE}
 bckps=0
 for run in ${runs[@]}; do
   echo "Will back up ${run}"
+  python /home/clinical/git/rikard/clinical/clinical/getbackup.py ${run}
 done
 for run in ${runs[@]}; do
   tar -czf ${BACKUPDIR}${run}.tar.gz ${run}
