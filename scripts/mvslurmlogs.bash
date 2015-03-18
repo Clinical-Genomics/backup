@@ -5,7 +5,7 @@
 
 . /mnt/hds/proj/bioinfo/SCRIPTS/log.bash
 
-log getversion
+log $(getversion)
 
 LOGDIR=/mnt/hds/proj/bioinfo/LOG/
 THISMONTH=$(date +'%Y%m01')
