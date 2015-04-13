@@ -28,22 +28,23 @@ echo "LOGDIR   -  ${LOGDIR}"
 echo "RUNBASE  -  ${RUNBASE}"
 echo "BACKUPDIR  -  ${BACKUPDIR}"
 echo "OLDRUNBASE  -  ${OLDRUNBASE}"
-echo "PREPROCRUNBASE  -  ${PREPROCRUNBASE}"
+echo "NASRUNBASE  -  ${NASRUNBASE}"
+echo "NASOLDRUNBASE  -  ${NASOLDRUNBASE}"
 echo "BACKUPSERVER  -  ${BACKUPSERVER}"
 echo "BACKUPSERVERBACKUPDIR  -  ${BACKUPSERVERBACKUPDIR}"
 echo "BACKUPCOPIED  -  ${BACKUPCOPIED}"
 NOW=$(date +"%Y%m%d%H%M%S")
 echo "[${NOW}] [${RUNBASE}] Backup the older runs"
-runs=$(find ${RUNBASE} -maxdepth 1 -name "*D00*" -mtime +8 | awk 'BEGIN {FS="/"} {print $NF}')
-cd ${RUNBASE}
+runs=$(find ${RUNBASE} -maxdepth 1 -name "*D00*" -mtime +8 -or -name "*_SN*" -mtime +8 | awk 'BEGIN {FS="/"} {print $NF}')
 
 bckps=0
 for run in ${runs[@]}; do
   echo "Will back up ${run}"
-  python /home/clinical/git/rikard/clinical/clinical/getbackup.py ${run}
+  python /home/clinical/SCRIPTS/clinical/clinical/getbackup.py ${run}
 done
 for run in ${runs[@]}; do
-  tar -czf ${BACKUPDIR}${run}.tar.gz ${run}
+  cd ${RUNBASE}
+  tar -czf ${BACKUPDIR}${run}.tar.gz ${RUNBASE}${run}
   tarcommand=$?
   NOW=$(date +"%Y%m%d%H%M%S")
   if [[ ${tarcommand} != 0 ]] ; then
@@ -55,7 +56,6 @@ for run in ${runs[@]}; do
   cd ${BACKUPDIR}
   md5sum ${run}.tar.gz > ${run}.tar.gz.md5.txt
   md5command=$?
-  cd ${RUNBASE}
   NOW=$(date +"%Y%m%d%H%M%S")
   if [[ ${md5command} != 0 ]] ; then
     echo "[${NOW}] md5sum ${run}.tar.gz failed:${md5command}"
@@ -69,15 +69,16 @@ for run in ${runs[@]}; do
 
   # issue this command for all NAS's
   for NAS in seq-nas-1 seq-nas-2 seq-nas-3 nas-6; do
-    ssh ${NAS} "mv ${PREPROCRUNBASE}${run} ${PREPROCOLDRUNBASE}"
+    ssh ${NAS} "mv ${NASRUNBASE}${run} ${NASOLDRUNBASE}"
     sshcommand=$?
     NOW=$(date +"%Y%m%d%H%M%S")
     if [[ ${sshcommand} != 0 ]] ; then
-      echo "[${NOW}] ssh ${NAS} mv ${PREPROCRUNBASE}${run} ${PREPROCOLDRUNBASE} failed:${sshcommand}"
+      echo "[${NOW}] ssh ${NAS} mv ${NASRUNBASE}${run} ${NASOLDRUNBASE} failed:${sshcommand}"
     else
-      echo "[${NOW}] ssh ${NAS} mv ${PREPROCRUNBASE}${run} ${PREPROCOLDRUNBASE} completed"
+      echo "[${NOW}] ssh ${NAS} mv ${NASRUNBASE}${run} ${NASOLDRUNBASE} completed"
     fi
   done
+  echo [${NOW}] [${run}] [${NASOLDRUNBASE}] Moved to old . . .
 
   mv ${RUNBASE}${run} ${OLDRUNBASE}
   mvcommand=$?
@@ -88,7 +89,6 @@ for run in ${runs[@]}; do
     echo "[${NOW}] [${run}] [${OLDRUNBASE}] Moved to old . . . completed"
   fi
 
-  echo [${NOW}] [${run}] [${PREPROCOLDRUNBASE}] Moved to old . . .
   let bckps++
 done
 NOW=$(date +"%Y%m%d%H%M%S")
@@ -133,7 +133,7 @@ for file in ${files[@]}; do
     servmd5=$(ssh ${BACKUPSERVER} md5sum ${BACKUPSERVERBACKUPDIR}${file} | awk '{print $1}')
     servold=$(ssh ${BACKUPSERVER} cat ${BACKUPSERVERBACKUPDIR}${file}.md5.txt | awk '{print $1}')
     NOW=$(date +"%Y%m%d%H%M%S")
-    if [ "${newmd5}" == "${oldmd5}" ]; then                   # compare copied md5s
+    if [ "${servmd5}" == "${servold}" ]; then                   # compare copied md5s
       echo "[${NOW}] [${file}] COPIED TO SERVER OK"         
       let copyoks++       
       mv ${BACKUPDIR}${file} ${BACKUPCOPIED}                 # move the copied ones to copied dir
