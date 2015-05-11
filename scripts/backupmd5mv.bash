@@ -130,7 +130,7 @@ for file in ${files[@]}; do
     servmd5=$(ssh ${BACKUPSERVER} md5sum ${BACKUPSERVERBACKUPDIR}${file} | awk '{print $1}')
     servold=$(ssh ${BACKUPSERVER} cat ${BACKUPSERVERBACKUPDIR}${file}.md5.txt | awk '{print $1}')
     NOW=$(date +"%Y%m%d%H%M%S")
-    if [ "${newmd5}" == "${oldmd5}" ]; then                   # compare copied md5s
+    if [ "${servmd5}" == "${servold}" ]; then                   # compare copied md5s
       echo "[${NOW}] [${file}] COPIED TO SERVER OK"         
       let copyoks++       
       mv ${BACKUPDIR}${file} ${BACKUPCOPIED}                 # move the copied ones to copied dir
