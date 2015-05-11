@@ -35,7 +35,7 @@ echo "BACKUPSERVERBACKUPDIR  -  ${BACKUPSERVERBACKUPDIR}"
 echo "BACKUPCOPIED  -  ${BACKUPCOPIED}"
 NOW=$(date +"%Y%m%d%H%M%S")
 echo "[${NOW}] [${RUNBASE}] Backup the older runs"
-runs=$(find ${RUNBASE} -maxdepth 1 -name "*D00*" -mtime +8 -or -name "*_SN*" -mtime +8 | awk 'BEGIN {FS="/"} {print $NF}')
+runs=$(find ${RUNBASE} -maxdepth 1 -name "*D00*" -mtime +15 -or -name "*_SN*" -mtime +15 | awk 'BEGIN {FS="/"} {print $NF}')
 
 bckps=0
 for run in ${runs[@]}; do
