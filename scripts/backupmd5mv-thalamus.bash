@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#    Usage: checkmd5.bash <toml-config-file>
+#    Usage: backupmd5-thalamus.bash <toml-config-file>
 #      run as hiseq.clinical 
 #      use screen or nohup
 #
@@ -28,23 +28,23 @@ echo "LOGDIR   -  ${LOGDIR}"
 echo "RUNBASE  -  ${RUNBASE}"
 echo "BACKUPDIR  -  ${BACKUPDIR}"
 echo "OLDRUNBASE  -  ${OLDRUNBASE}"
-echo "PREPROC  -  ${PREPROC}"
-echo "PREPROCRUNBASE  -  ${PREPROCRUNBASE}"
+echo "NASRUNBASE  -  ${NASRUNBASE}"
+echo "NASOLDRUNBASE  -  ${NASOLDRUNBASE}"
 echo "BACKUPSERVER  -  ${BACKUPSERVER}"
 echo "BACKUPSERVERBACKUPDIR  -  ${BACKUPSERVERBACKUPDIR}"
 echo "BACKUPCOPIED  -  ${BACKUPCOPIED}"
 NOW=$(date +"%Y%m%d%H%M%S")
 echo "[${NOW}] [${RUNBASE}] Backup the older runs"
-runs=$(find ${RUNBASE} -maxdepth 1 -name "*D00*" -mtime +8 | awk 'BEGIN {FS="/"} {print $NF}')
-cd ${RUNBASE}
+runs=$(find ${RUNBASE} -maxdepth 1 -name "*D00*" -mtime +15 -or -name "*_SN*" -mtime +15 | awk 'BEGIN {FS="/"} {print $NF}')
 
 bckps=0
 for run in ${runs[@]}; do
   echo "Will back up ${run}"
-  python /home/clinical/git/rikard/clinical/clinical/getbackup.py ${run}
+  python /home/clinical/SCRIPTS/clinical/clinical/getbackup.py ${run}
 done
 for run in ${runs[@]}; do
-  tar -czf ${BACKUPDIR}${run}.tar.gz ${run}
+  cd ${RUNBASE}
+  tar -czf ${BACKUPDIR}${run}.tar.gz ${RUNBASE}${run}
   tarcommand=$?
   NOW=$(date +"%Y%m%d%H%M%S")
   if [[ ${tarcommand} != 0 ]] ; then
@@ -56,7 +56,6 @@ for run in ${runs[@]}; do
   cd ${BACKUPDIR}
   md5sum ${run}.tar.gz > ${run}.tar.gz.md5.txt
   md5command=$?
-  cd ${RUNBASE}
   NOW=$(date +"%Y%m%d%H%M%S")
   if [[ ${md5command} != 0 ]] ; then
     echo "[${NOW}] md5sum ${run}.tar.gz failed:${md5command}"
@@ -67,6 +66,20 @@ for run in ${runs[@]}; do
   md5=$(cat ${BACKUPDIR}${run}.tar.gz.md5.txt)
   NOW=$(date +"%Y%m%d%H%M%S")
   echo [${NOW}] [${run}] [${md5}] Backup files generated
+
+  # issue this command for all NAS's
+  for NAS in seq-nas-1 seq-nas-2 seq-nas-3 nas-6; do
+    ssh ${NAS} "mv ${NASRUNBASE}${run} ${NASOLDRUNBASE}"
+    sshcommand=$?
+    NOW=$(date +"%Y%m%d%H%M%S")
+    if [[ ${sshcommand} != 0 ]] ; then
+      echo "[${NOW}] ssh ${NAS} mv ${NASRUNBASE}${run} ${NASOLDRUNBASE} failed:${sshcommand}"
+    else
+      echo "[${NOW}] ssh ${NAS} mv ${NASRUNBASE}${run} ${NASOLDRUNBASE} completed"
+    fi
+  done
+  echo [${NOW}] [${run}] [${NASOLDRUNBASE}] Moved to old . . .
+
   mv ${RUNBASE}${run} ${OLDRUNBASE}
   mvcommand=$?
   NOW=$(date +"%Y%m%d%H%M%S")
@@ -76,16 +89,6 @@ for run in ${runs[@]}; do
     echo "[${NOW}] [${run}] [${OLDRUNBASE}] Moved to old . . . completed"
   fi
 
-  ssh ${PREPROC} "mv ${PREPROCRUNBASE}${run} ${PREPROCOLDRUNBASE}"
-  sshcommand=$?
-  NOW=$(date +"%Y%m%d%H%M%S")
-  if [[ ${sshcommand} != 0 ]] ; then
-    echo "[${NOW}] ssh ${PREPROC} mv ${PREPROCRUNBASE}${run} ${PREPROCOLDRUNBASE} failed:${sshcommand}"
-  else
-    echo "[${NOW}] ssh ${PREPROC} mv ${PREPROCRUNBASE}${run} ${PREPROCOLDRUNBASE} completed"
-  fi
-
-  echo [${NOW}] [${run}] [${PREPROC}] [${PREPROCOLDRUNBASE}] Moved to old . . .
   let bckps++
 done
 NOW=$(date +"%Y%m%d%H%M%S")
