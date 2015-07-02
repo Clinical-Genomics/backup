@@ -4,34 +4,43 @@
 #      run as hiseq.clinical 
 #      use screen or nohup
 #
+
+# Echo's a timestamped message in the form of [timestamp] [module] message
+# Args:
+#   message (str): the message to be printed
+log() {
+  NOW=$(date +"%Y%m%d%H%M%S")
+  MSG=$1
+  echo [${NOW}] ${MSG}
+  echo [${NOW}] ${MSG} >> ${LOGFILE}
+}
+
 . /home/clinical/CONFIG/configuration.txt
-echo "Variables read in from /home/clinical/CONFIG/configuration.txt"
-echo "              RUNBASE  -  ${RUNBASE}"
-echo "            BACKUPDIR  -  ${BACKUPDIR}"
-echo "           OLDRUNBASE  -  ${OLDRUNBASE}"
-echo "              PREPROC  -  ${PREPROC}"
-echo "       PREPROCRUNBASE  -  ${PREPROCRUNBASE}"
-echo "         BACKUPSERVER  -  ${BACKUPSERVER}"
-echo "BACKUPSERVERBACKUPDIR  -  ${BACKUPSERVERBACKUPDIR}"
-echo "         BACKUPCOPIED  -  ${BACKUPCOPIED}"
-echo "               LOGDIR  -  ${LOGDIR}"
 NOW=$(date +"%Y%m%d%H%M%S")
-logfile=${LOGDIR}check${NOW}.log
-echo "Logfile is ${logfile}"
+LOGFILE=${LOGDIR}check${NOW}.log
+
+log "Logfile is ${LOGFILE}"
+log "Variables read in from /home/clinical/CONFIG/configuration.txt"
+log "              RUNBASE  -  ${RUNBASE}"
+log "            BACKUPDIR  -  ${BACKUPDIR}"
+log "           OLDRUNBASE  -  ${OLDRUNBASE}"
+log "              PREPROC  -  ${PREPROC}"
+log "       PREPROCRUNBASE  -  ${PREPROCRUNBASE}"
+log "         BACKUPSERVER  -  ${BACKUPSERVER}"
+log "BACKUPSERVERBACKUPDIR  -  ${BACKUPSERVERBACKUPDIR}"
+log "         BACKUPCOPIED  -  ${BACKUPCOPIED}"
+log "               LOGDIR  -  ${LOGDIR}"
 
 SERVERS=(clinical-db clinical-preproc clinical-nas-1 clinical-nas-2 seq-nas-1 seq-nas-2 seq-nas-3 nas-6 nas-7 nas-8 nas-9 nas-10)
 
 for SERVER in "${SERVERS[@]}"; do
-  NOW=$(date +"%Y%m%d%H%M%S")
-  echo "[${NOW}] Will check ${SERVER}"
-  #echo "[${NOW}] Will check ${SERVER}" >> ${logfile}
   SERVER_HOME=$(ssh ${SERVER} df -h 2> /dev/null | grep home)
   SERVER_HOME=$(echo ${SERVER_HOME} | awk '{ print $6,$5 }')
-  echo -n "   ${SERVER} ${SERVER_HOME}"
+  MSG="   ${SERVER} ${SERVER_HOME}"
   if [[ "$(echo ${SERVER_HOME} | awk '{split($2,arr,"%");print arr[1]}')" -ge 85 ]]; then
-    echo -n "   -  C R I T I C A L !"
+    MSG="${MSG}  -  C R I T I C A L !"
   fi
-  echo
+  log "${MSG}"
 done
 
 exit 0
