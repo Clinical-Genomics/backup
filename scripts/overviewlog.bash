@@ -5,7 +5,7 @@
 #      use screen or nohup
 #
 
-VERSION=1.1.0
+VERSION=1.2.0
 echo "VERSION ${VERSION}"
 
 # Echo's a timestamped message in the form of [timestamp] [module] message
