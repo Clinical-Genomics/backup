@@ -6,7 +6,6 @@
 #
 
 VERSION=1.2.0
-echo "VERSION ${VERSION}"
 
 # Echo's a timestamped message in the form of [timestamp] [module] message
 # Args:
@@ -17,6 +16,8 @@ log() {
   echo [${NOW}] ${MSG}
   echo [${NOW}] ${MSG} >> ${LOGFILE}
 }
+
+log "VERSION ${VERSION}"
 
 . /home/clinical/CONFIG/configuration.txt
 NOW=$(date +"%Y%m%d%H%M%S")

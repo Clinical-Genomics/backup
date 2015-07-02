@@ -11,6 +11,10 @@
 ## password = "DBPASSWORD"
 ## host = localhost
 #
+
+VERSION=1.2.0
+echo "VERSION ${VERSION}"
+
 . /home/clinical/CONFIG/configuration.txt
 NOW=$(date +"%Y%m%d%H%M%S")
 mysqldump clinstatsdb > ${BACKUPDIR}clinstatsdb_${NOW}.sql
