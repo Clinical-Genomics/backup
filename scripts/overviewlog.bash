@@ -25,26 +25,20 @@ LOGFILE=${LOGDIR}check${NOW}.log
 
 log "Logfile is ${LOGFILE}"
 log "Variables read in from /home/clinical/CONFIG/configuration.txt"
-log "              RUNBASE  -  ${RUNBASE}"
-log "            BACKUPDIR  -  ${BACKUPDIR}"
-log "           OLDRUNBASE  -  ${OLDRUNBASE}"
-log "              PREPROC  -  ${PREPROC}"
-log "       PREPROCRUNBASE  -  ${PREPROCRUNBASE}"
-log "         BACKUPSERVER  -  ${BACKUPSERVER}"
-log "BACKUPSERVERBACKUPDIR  -  ${BACKUPSERVERBACKUPDIR}"
-log "         BACKUPCOPIED  -  ${BACKUPCOPIED}"
 log "               LOGDIR  -  ${LOGDIR}"
 
-SERVERS=(clinical-db clinical-preproc clinical-nas-1 clinical-nas-2 seq-nas-1 seq-nas-2 seq-nas-3 nas-6 nas-7 nas-8 nas-9 nas-10)
+declare -A SERVERS=( [clinical-db]=/home [clinical-preproc]=/home [clinical-nas-1]=/home [clinical-nas-2]=/home [seq-nas-1]=/home [seq-nas-2]=/home [seq-nas-3]=/home [nas-6]=/home [nas-7]=/home [nas-8]=/home [nas-9]=/home [nas-10]=/home [rasta]=/mnt/hds2,256T )
 
-for SERVER in "${SERVERS[@]}"; do
-  SERVER_HOME=$(ssh ${SERVER} df -h 2> /dev/null | grep home)
-  SERVER_HOME=$(echo ${SERVER_HOME} | awk '{ print $6,$5 }')
-  MSG="   ${SERVER} ${SERVER_HOME}"
-  if [[ "$(echo ${SERVER_HOME} | awk '{split($2,arr,"%");print arr[1]}')" -ge 85 ]]; then
-    MSG="${MSG}  -  C R I T I C A L !"
-  fi
-  log "${MSG}"
+for SERVER in "${!SERVERS[@]}"; do
+  DIRS=( $( echo ${SERVERS[$SERVER]} | sed -e 's/,/ /g' ) )
+  for DIR in ${DIRS[@]}; do
+      SERVER_HOME=$(ssh ${SERVER} df -h 2> /dev/null | grep -F "$DIR" | awk '{ print $NF,$(NF -1) }')
+      MSG="   ${SERVER} ${SERVER_HOME}"
+      if [[ "$(echo ${SERVER_HOME} | awk '{split($2,arr,"%");print arr[1]}')" -ge 85 ]]; then
+        MSG="${MSG}  -  C R I T I C A L !"
+      fi
+      log "${MSG}"
+   done
 done
 
 exit 0
