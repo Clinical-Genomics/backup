@@ -4,6 +4,10 @@
 #      run as hiseq.clinical 
 #      use screen or nohup
 #
+
+VERSION=1.2.3
+echo "VERSION ${VERSION}"
+
 if [ -f "$1" ] ; then 
   CONF=$1
 else
@@ -35,7 +39,7 @@ echo "BACKUPSERVERBACKUPDIR  -  ${BACKUPSERVERBACKUPDIR}"
 echo "BACKUPCOPIED  -  ${BACKUPCOPIED}"
 NOW=$(date +"%Y%m%d%H%M%S")
 echo "[${NOW}] [${RUNBASE}] Backup the older runs"
-runs=$(find ${RUNBASE} -maxdepth 1 -name "*D00*" -mtime +15 -or -name "*_SN*" -mtime +15 | awk 'BEGIN {FS="/"} {print $NF}')
+runs=$(find ${RUNBASE} -maxdepth 1 -name "*D00*" -mtime +65 -or -name "*_SN*" -mtime +15 | awk 'BEGIN {FS="/"} {print $NF}')
 
 bckps=0
 for run in ${runs[@]}; do
@@ -68,7 +72,7 @@ for run in ${runs[@]}; do
   echo [${NOW}] [${run}] [${md5}] Backup files generated
 
   # issue this command for all NAS's
-  for NAS in seq-nas-1 seq-nas-2 seq-nas-3 nas-6; do
+  for NAS in seq-nas-1 seq-nas-2 seq-nas-3 nas-6 clinical-nas-2; do
     ssh ${NAS} "mv ${NASRUNBASE}${run} ${NASOLDRUNBASE}"
     sshcommand=$?
     NOW=$(date +"%Y%m%d%H%M%S")
