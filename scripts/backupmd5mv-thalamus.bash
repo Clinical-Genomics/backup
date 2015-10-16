@@ -5,7 +5,7 @@
 #      use screen or nohup
 #
 
-VERSION=1.2.4
+VERSION=1.3.0
 echo "VERSION ${VERSION}"
 
 if [ -f "$1" ] ; then 

@@ -12,7 +12,7 @@
 ## host = localhost
 #
 
-VERSION=1.2.4
+VERSION=1.3.0
 echo "VERSION ${VERSION}"
 
 . /home/clinical/CONFIG/configuration.txt
