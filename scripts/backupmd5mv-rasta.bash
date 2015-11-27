@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=1.3.0
+VERSION=1.3.1
 echo "VERSION ${VERSION}"
 
 RUNDIR=/mnt/hds2/proj/bioinfo/Runs/
