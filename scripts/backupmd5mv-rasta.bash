@@ -9,7 +9,8 @@ BACKUPDIR=/mnt/hds/proj/bioinfo/BACKUP/
 NASRUNDIR=/home/hiseq.clinical/Runs/
 NASOLDRUNDIR=/home/hiseq.clinical/oldRuns/
 
-for RUN in $( cd ${RUNDIR} && ls -1); do
+runs=$(find ${RUNDIR} -maxdepth 1 -mtime +15 | awk 'BEGIN {FS="/"} {print $NF}')
+for RUN in $runs; do
     echo ${BACKUPDIR}/${RUN}.tar.gz
 
     echo tar -czf ${BACKUPDIR}/${RUN}.tar.gz ${RUNDIR}/${RUN}/
@@ -29,7 +30,7 @@ for RUN in $( cd ${RUNDIR} && ls -1); do
 	    continue # it's not on this NAS
         fi
 
-        ssh ${NAS} "mv ${NASRUNDIR}/${run} ${NASOLDRUNBASE}"
+        ssh ${NAS} "mv ${NASRUNDIR}/${run} ${NASOLDRUNDIR}"
         sshcommand=$?
         NOW=$(date +"%Y%m%d%H%M%S")
         if [[ ${sshcommand} != 0 ]] ; then
