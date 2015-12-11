@@ -22,7 +22,7 @@ for RUN in $runs; do
     echo mv ${RUNDIR}/${RUN} ${OLDRUNDIR}/
     mv ${RUNDIR}/${RUN} ${OLDRUNDIR}/
 
-    for NAS in seq-nas-1 nas-7 nas-8 nas-9 nas-10; do
+    for NAS in seq-nas-2 nas-7 nas-8 nas-9 nas-10; do
         ssh ${NAS} "ls ${NASRUNDIR}/${run}"
         sshcommand=$?
         if [[ ${sshcommand} != 0 ]] ; then
