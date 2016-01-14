@@ -5,7 +5,7 @@
 #      use screen or nohup
 #
 
-VERSION=3.0.1
+VERSION=3.1.0
 
 # Echo's a timestamped message in the form of [timestamp] [module] message
 # Args:
