@@ -16,13 +16,13 @@ RUNS=$(find ${RUNDIR} -maxdepth 1 -mtime +15 | awk 'BEGIN {FS="/"} {print $NF}')
 for RUN in ${RUNS}; do
     echo ${BACKUPDIR}/${RUN}.tar.gz
 
-    echo tar -czf ${BACKUPDIR}/${RUN}.tar.gz ${RUNDIR}/${RUN}/
+    echo "tar -czf ${BACKUPDIR}/${RUN}.tar.gz ${RUNDIR}/${RUN}/"
     tar -czf ${BACKUPDIR}/${RUN}.tar.gz ${RUNDIR}/${RUN}/
 
     echo "md5sum ${BACKUPDIR}/${RUN}.tar.gz > ${BACKUPDIR}/${RUN}.tar.gz.md5.txt"
     md5sum ${BACKUPDIR}/${RUN}.tar.gz > ${BACKUPDIR}/${RUN}.tar.gz.md5.txt
 
-    echo mv ${RUNDIR}/${RUN} ${OLDRUNDIR}/
+    echo "mv ${RUNDIR}/${RUN} ${OLDRUNDIR}/"
     mv ${RUNDIR}/${RUN} ${OLDRUNDIR}/
 
     for NAS in seq-nas-2 nas-7 nas-8 nas-9 nas-10; do
@@ -33,6 +33,7 @@ for RUN in ${RUNS}; do
 	    continue # it's not on this NAS
         fi
 
+        echo "ssh ${NAS} 'mv ${NASRUNDIR}/${RUN} ${NASOLDRUNDIR}'"
         ssh ${NAS} "mv ${NASRUNDIR}/${RUN} ${NASOLDRUNDIR}"
         sshcommand=$?
         NOW=$(date +"%Y%m%d%H%M%S")
@@ -41,5 +42,6 @@ for RUN in ${RUNS}; do
         else
             echo "ssh ${NAS} mv ${NASRUNDIR}${RUN} ${NASOLDRUNDIR} completed"
         fi
+        break
     done
 done
