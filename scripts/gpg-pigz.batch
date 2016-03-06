@@ -1,0 +1,36 @@
+#!/bin/bash
+#SBATCH -t 24:00:00
+#SBATCH -c 16
+#SBATCH -A prod001
+#SBATCH -J gpg_test
+#SBATCH --output=/mnt/hds/proj/bioinfo/LOG/gpg-test-%j.out
+#SBATCH --error=/mnt/hds/proj/bioinfo/LOG/gpg-test-%j.err
+##SBATCH --mail-type=ALL
+##SBATCH --mail-user=kenny.billiau@scilifelab.se
+
+#!/bin/bash
+
+echo 'GPG PIGZ no compress'
+
+OUTFILE=$(mktemp)
+
+date +"%Y%m%d%H%M%S"
+cp -Rf $1 ${TMPDIR}/indir
+
+date +"%Y%m%d%H%M%S"
+time tar -cf - ${TMPDIR}/indir/ | pigz -p 13 -c --fast - | tee >(md5sum > ${OUTFILE}.tar.gz.md5sum) | gpg --symmetric --cipher-algo aes256 --passphrase-file /mnt/hds/proj/bioinfo/tmp/passphrase --batch --compress-algo none -o ${OUTFILE}.tar.gz.gpg
+
+date +"%Y%m%d%H%M%S"
+time gpg --decrypt --cipher-algo aes256 --passphrase-file /mnt/hds/proj/bioinfo/tmp/passphrase --batch ${OUTFILE}.tar.gz.gpg | md5sum > ${OUTFILE}.tar.gz.degpg.md5sum
+
+date +"%Y%m%d%H%M%S"
+diff ${OUTFILE}.tar.gz.md5sum ${OUTFILE}.tar.gz.degpg.md5sum
+ll ${OUTFILE}.tar.gz.gpg
+
+date +"%Y%m%d%H%M%S"
+#$(dirname $1)
+RETURNDIR=/mnt/hds/proj/bioinfo/tmp/
+RETURNFILE=$(basename $)
+cp ${OUTFILE}.tar.gz.gpg ${RETURNDIR}/${RETURNFILE}.tar.ngz.gpg
+cp ${OUTFILE}.tar.gz.md5sum ${RETURNDIR}/${RETURNFILE}.tar.ngz.md5sum
+date +"%Y%m%d%H%M%S"
