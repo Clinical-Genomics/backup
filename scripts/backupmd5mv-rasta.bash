@@ -17,7 +17,7 @@ for RUN in ${RUNS}; do
     echo ${BACKUPDIR}/${RUN}.tar.gz
 
     echo "tar -czf ${BACKUPDIR}/${RUN}.tar.gz ${RUNDIR}/${RUN}/"
-    tar -czf ${BACKUPDIR}/${RUN}.tar.gz ${RUNDIR}/${RUN}/
+    tar -cf - ${RUNDIR}/${RUN}/ | pigz --fast -p 8 -c - > ${BACKUPDIR}/${RUN}.tar.gz
 
     echo "md5sum ${BACKUPDIR}/${RUN}.tar.gz > ${BACKUPDIR}/${RUN}.tar.gz.md5.txt"
     md5sum ${BACKUPDIR}/${RUN}.tar.gz > ${BACKUPDIR}/${RUN}.tar.gz.md5.txt
@@ -26,7 +26,7 @@ for RUN in ${RUNS}; do
     mv ${RUNDIR}/${RUN} ${OLDRUNDIR}/
 
     for NAS in seq-nas-2 nas-7 nas-8 nas-9 nas-10; do
-        ssh ${NAS} "ls ${NASRUNDIR}/${RUN}"
+        ssh ${NAS} "ls ${NASRUNDIR}/${RUN}" > /dev/null
         sshcommand=$?
         if [[ ${sshcommand} != 0 ]] ; then
             echo "skipping ${NAS}..."
@@ -36,7 +36,6 @@ for RUN in ${RUNS}; do
         echo "ssh ${NAS} 'mv ${NASRUNDIR}/${RUN} ${NASOLDRUNDIR}'"
         ssh ${NAS} "mv ${NASRUNDIR}/${RUN} ${NASOLDRUNDIR}"
         sshcommand=$?
-        NOW=$(date +"%Y%m%d%H%M%S")
         if [[ ${sshcommand} != 0 ]] ; then
             echo "ssh ${NAS} mv ${NASRUNDIR}${RUN} ${NASOLDRUNDIR} failed:${sshcommand}"
         else
