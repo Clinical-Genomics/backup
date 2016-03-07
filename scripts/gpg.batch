@@ -5,8 +5,8 @@
 #SBATCH -J gpg_test
 #SBATCH --output=/mnt/hds/proj/bioinfo/LOG/gpg-test-%j.out
 #SBATCH --error=/mnt/hds/proj/bioinfo/LOG/gpg-test-%j.err
-##SBATCH --mail-type=ALL
-##SBATCH --mail-user=kenny.billiau@scilifelab.se
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=kenny.billiau@scilifelab.se
 
 #!/bin/bash
 
@@ -38,4 +38,5 @@ date +"%Y%m%d%H%M%S"
 RETURNDIR=/mnt/hds/proj/bioinfo/tmp/
 RETURNFILE=$(basename $)
 cp ${OUTFILE}.tar.gpg ${RETURNDIR}/${RETURNFILE}.tar.n.gpg
+cp ${OUTFILE}.tar.md5sum ${RETURNDIR}/${RETURNFILE}.tar.n.md5sum
 date +"%Y%m%d%H%M%S"
