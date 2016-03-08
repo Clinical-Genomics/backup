@@ -17,7 +17,7 @@ PASSPHRASEFILE=$(mktemp)
 
 date +"%Y%m%d%H%M%S"
 gpg --gen-random 2 256 > ${PASSPHRASEFILE}
-ll ${PASSPHRASEFILE}
+ls -l ${PASSPHRASEFILE}
 cp -R $1 ${TMPDIR}/indir
 
 date +"%Y%m%d%H%M%S"
@@ -27,7 +27,7 @@ date +"%Y%m%d%H%M%S"
 time gpg --decrypt --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch ${OUTFILE}.tar.gz.gpg | md5sum > ${OUTFILE}.tar.gz.degpg.md5sum
 
 date +"%Y%m%d%H%M%S"
-ll ${OUTFILE}.tar.gz.gpg
+ls -l ${OUTFILE}.tar.gz.gpg
 diff ${OUTFILE}.tar.gz.md5sum ${OUTFILE}.tar.gz.degpg.md5sum
 
 # asymmetrically encrypt the passphrase file
