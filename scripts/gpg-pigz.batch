@@ -8,36 +8,39 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kenny.billiau@scilifelab.se
 
-#!/bin/bash
-
-echo 'GPG PIGZ no compress'
-
+IN=$1
 OUTFILE=$(mktemp)
 PASSPHRASEFILE=$(mktemp)
 
-date +"%Y%m%d%H%M%S"
+INDIR=$(dirname ${IN})
+INFILE=$(basename ${IN})
+
+cd ${INDIR}
+
+log() {
+    NOW=$(date +"%Y%m%d%H%M%S")
+    echo "[${NOW}] $@"
+}
+
+log "gpg --gen-random 1 256 > ${PASSPHRASEFILE}"
 gpg --gen-random 2 256 > ${PASSPHRASEFILE}
-ls -l ${PASSPHRASEFILE}
-cp -R $1 ${TMPDIR}/indir
 
-date +"%Y%m%d%H%M%S"
-time tar -cf - ${TMPDIR}/indir/ | pigz -p 13 --fast -c - | tee >(md5sum > ${OUTFILE}.tar.gz.md5sum) | gpg --symmetric --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch --compress-algo none -o ${OUTFILE}.tar.gz.gpg
+# asymmetrically encrypt the passphrase file
+log "gpg -e -r '057E7EDE' -o ${PASSPHRASEFILE}.gpg ${PASSPHRASEFILE}"
+#gpg -e -r '057E7EDE' -o ${PASSPHRASEFILE}.gpg ${PASSPHRASEFILE}
+ls -l ${PASSPHRASEFILE}*
 
-date +"%Y%m%d%H%M%S"
+log "time tar -cf - ${INFILE} | pigz -p 13 --fast -c - | tee >(md5sum > ${OUTFILE}.tar.gz.md5sum) | gpg --symmetric --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch --compress-algo none -o ${OUTFILE}.tar.gz.gpg"
+time tar -cf - ${INFILE} | pigz -p 13 --fast -c - | tee >(md5sum > ${OUTFILE}.tar.gz.md5sum) | gpg --symmetric --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch --compress-algo none -o ${OUTFILE}.tar.gz.gpg
+
+log "time gpg --decrypt --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch ${OUTFILE}.tar.gz.gpg | md5sum > ${OUTFILE}.tar.gz.degpg.md5sum"
 time gpg --decrypt --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch ${OUTFILE}.tar.gz.gpg | md5sum > ${OUTFILE}.tar.gz.degpg.md5sum
 
-date +"%Y%m%d%H%M%S"
+log "diff ${OUTFILE}.tar.gz.md5sum ${OUTFILE}.tar.gz.degpg.md5sum"
 ls -l ${OUTFILE}.tar.gz.gpg
 diff ${OUTFILE}.tar.gz.md5sum ${OUTFILE}.tar.gz.degpg.md5sum
 
-# asymmetrically encrypt the passphrase file
-# TODO
+# rm ${PASSPHRASEFILE}
 
-date +"%Y%m%d%H%M%S"
-#$(dirname $1)
-RETURNDIR=/mnt/hds/proj/bioinfo/tmp/
-RETURNFILE=$(basename $)
-cp ${OUTFILE}.tar.gz.gpg ${RETURNDIR}/${RETURNFILE}.tar.gz.n.gpg
-cp ${OUTFILE}.tar.gz.md5sum ${RETURNDIR}/${RETURNFILE}.tar.gz.n.md5sum
-cp ${PASSPHRASEFILE} ${RETURNDIR}/${RETURNFILE}.gz.n.pass
-date +"%Y%m%d%H%M%S"
+cd -
+log "Finished"
