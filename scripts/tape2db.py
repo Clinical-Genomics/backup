@@ -7,13 +7,32 @@ import sys
 import os
 import time
 from datetime import datetime
+import yaml
+from os.path import expanduser
 
 from glob import glob
 
 from sqlalchemy.orm import Load
 
-from clinstatsdb.db import SQL
+from clinstatsdb.db.store import connect
 from clinstatsdb.db.models import Backuptape, Backup
+
+class Config:
+
+    def __init__(self):
+        with open(expanduser("~/.clinical/databases.yaml"), 'r') as ymlfile:
+            self.config = yaml.load(ymlfile)
+
+    def __getitem__(self, key):
+        """Simple array-based getter.
+
+        Args:
+            key (str): Gets the value for this key in the YAML file.
+
+        Returns (str, dict): returns the structure underneat this key.
+
+        """
+        return self.config[key]
 
 def get_runs(d):
     files = [f for f in os.listdir(d)]
@@ -50,6 +69,9 @@ def main(argv):
     tape_dir = argv[0]
     tape_name = os.path.basename(tape_dir.rstrip('/'))
 
+    config = Config()
+    SQL = connect(config['clinstats']['connection_string'])
+
     tape_id = Backuptape.exists(tape_name)
     print("TAPE: {} {}".format(tape_name, tape_id))
     if not tape_id:
@@ -73,7 +95,7 @@ def main(argv):
     for run in runs:
         run_name = run.replace('.tar.gz', '')
         backup_runname = Backup.exists(run_name)
-        print(backup_runname)
+        print('Arch name: ' + backup_runname)
         if backup_runname:
             backup = SQL.query(Backup).filter(Backup.runname==run_name).one()
         else:
@@ -82,9 +104,9 @@ def main(argv):
         backup.runname = run_name
         backup.backuptape_id = tape_id
         backup.backupdone = get_mtime(os.path.join(tape_dir, run))
-        print(backup.backupdone)
+        print('Arch done: ' + backup.backupdone)
         backup.md5done = get_mtime(os.path.join(tape_dir, run + '.md5.txt'))
-        print(backup.md5done)
+        print('MD5 done : ' + backup.md5done)
 
         SQL.add(backup)
         SQL.flush()
