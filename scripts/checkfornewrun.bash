@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -e
+
+INDIR=$1
+OUTDIR=${2-/home/hiseq.clinical/ENCRYPT}
+REMOTE_OUTDIR=${3-rasta:/mnt/hds/proj/bioinfo/BACKUP}
+MVDIR=/home/hiseq.clinical/BACKUP
+
+SCRIPTDIR=$(dirname $0)
+
+log() {
+    NOW=$(date +"%Y%m%d%H%M%S")
+    echo "[${NOW}] $@"
+}
+
+sync() {
+    log "rsync -av $1 $2"
+    rsync -av $1 $2
+    log "rsync -av --checksum $1 $2"
+    rsync -av --checksum $1 $2
+}
+
+log "find ${INDIR} -name RTAComplete.txt -mtime +5 -maxdepth 2"
+RTACOMPLETES=$(find ${INDIR} -name RTAComplete.txt -mtime +5 -maxdepth 2)
+for RTACOMPLETE in $RTACOMPLETES; do
+    RUN=$(basename $(dirname ${RTACOMPLETE}))
+    log ${RUN}
+    if [[ ! -e ${OUTDIR}/${RUN}.tar.gz.gpg ]]; then
+        log "gpg-pigz.batch ${INDIR}/${RUN} ${OUTDIR}"
+        bash ${SCRIPTDIR}/gpg-pigz.batch "${INDIR}/${RUN}" "${OUTDIR}"
+
+        sync ${OUTDIR}/${RUN}.tar.gz.gpg ${REMOTE_OUTDIR}/
+        sync ${OUTDIR}/${RUN}.key.gpg ${REMOTE_OUTDIR}/
+
+        log "mv ${INDIR}/${RUN} ${MVDIR}/"
+        mv ${INDIR}/${RUN} ${MVDIR}/
+    fi
+done
