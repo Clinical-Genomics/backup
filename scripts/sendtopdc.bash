@@ -24,10 +24,10 @@ if pgrep dsmc; then
     exit
 fi
 
-for RUNFILE in ls ${INDIR}/*.tar.gz.gpg; do
+for RUNFILE in ${INDIR}/*.tar.gz.gpg; do
     RUN=${RUNFILE%%.*}
     KEYFILE=${RUN}.key.gpg
-    if ! dsmc q archive "${RUNFILE}"; then
+    if ! dsmc q archive "${RUNFILE}" > /dev/null; then
         log "dsmc archive ${RUNFILE} && dsmc archive ${KEYFILE}"
         dsmc archive ${RUNFILE} && dsmc archive ${KEYFILE}
         #if [[ $? -eq 0 ]]; then
@@ -36,5 +36,7 @@ for RUNFILE in ls ${INDIR}/*.tar.gz.gpg; do
         #    log "rm ${KEYFILE}"
         #    rm ${KEYFILE}
         #fi
+    else
+        log "${RUN} has already been sent"
     fi
 done
