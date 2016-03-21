@@ -2,7 +2,7 @@
 
 set -e
 
-INDIR=$1
+INDIR=${1?'Need a directory to monitor'}
 OUTDIR=${2-/home/hiseq.clinical/ENCRYPT}
 REMOTE_OUTDIR=${3-rasta:/mnt/hds/proj/bioinfo/BACKUP}
 MVDIR=/home/hiseq.clinical/BACKUP
