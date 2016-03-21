@@ -19,6 +19,11 @@ log() {
 # MAIN #
 ########
 
+if pgrep dsmc; then
+    log "dsmc is already running - exit"
+    exit
+fi
+
 for RUNFILE in ls ${INDIR}/*.tar.gz.gpg; do
     RUN=${RUNFILE%%.*}
     KEYFILE=${RUN}.key.gpg
