@@ -85,6 +85,7 @@ fi
 
 mv ${PASSPHRASEFILE}.gpg ${OUTDIR}/${RUN}.key.gpg
 rm ${PASSPHRASEFILE}
+rm ${OUTDIR}/${RUN}.tar.gz.md5sum
 rm ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum
 cd -
 log "Finished"

@@ -4,7 +4,7 @@ set -e
 
 INDIR=${1?'Need a directory to monitor'}
 OUTDIR=${2-/home/hiseq.clinical/ENCRYPT}
-REMOTE_OUTDIR=${3-rasta:/mnt/hds/proj/bioinfo/BACKUP}
+REMOTE_OUTDIR=${3-rasta:/mnt/hds/proj/bioinfo/PDC}
 MVDIR=/home/hiseq.clinical/BACKUP
 
 SCRIPTDIR=$(dirname $0)
