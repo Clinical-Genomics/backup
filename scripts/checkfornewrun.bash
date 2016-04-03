@@ -26,8 +26,9 @@ RTACOMPLETES=$(find ${INDIR} -name RTAComplete.txt -mtime +5 -maxdepth 2)
 for RTACOMPLETE in $RTACOMPLETES; do
     RUN=$(basename $(dirname ${RTACOMPLETE}))
     log ${RUN}
-    if [[ ! -e ${OUTDIR}/${RUN}.tar.gz.gpg ]]; then
+    if [[ ! -e ${OUTDIR}/${RUN}_started ]]; then
         log "gpg-pigz.batch ${INDIR}/${RUN} ${OUTDIR}"
+        touch ${OUTDIR}/${RUN}_started
         bash ${SCRIPTDIR}/gpg-pigz.batch "${INDIR}/${RUN}" "${OUTDIR}"
 
         sync ${OUTDIR}/${RUN}.tar.gz.gpg ${REMOTE_OUTDIR}/
@@ -39,7 +40,7 @@ for RTACOMPLETE in $RTACOMPLETES; do
         log "mv ${INDIR}/${RUN} ${MVDIR}/"
         mv ${INDIR}/${RUN} ${MVDIR}/
 
-        log "rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg"
-        rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg
+        log "rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}_started"
+        rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}_started
     fi
 done
