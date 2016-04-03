@@ -34,8 +34,7 @@ for RTACOMPLETE in $RTACOMPLETES; do
         sync ${OUTDIR}/${RUN}.key.gpg ${REMOTE_OUTDIR}/
 
         # signal the transfer is complete
-        touch ${OUTDIR}/${RUN}_complete
-        sync ${OUTDIR}/${RUN}_complete ${REMOTE_OUTDIR}/
+        touch ${REMOTE_OUTDIR}/${RUN}_complete
 
         log "mv ${INDIR}/${RUN} ${MVDIR}/"
         mv ${INDIR}/${RUN} ${MVDIR}/
