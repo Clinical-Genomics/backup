@@ -26,6 +26,11 @@ fi
 
 for RUNFILE in ${INDIR}/*.tar.gz.gpg; do
     RUN=${RUNFILE%%.*}
+
+    if [[ ! -e ${INDIR}/${RUN}_complete ]]; then
+        continue # if not yet fully copied, skip
+    fi
+
     KEYFILE=${RUN}.key.gpg
     if ! dsmc q archive "${RUNFILE}" > /dev/null; then
         log "dsmc archive ${RUNFILE} && dsmc archive ${KEYFILE}"

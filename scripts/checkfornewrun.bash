@@ -4,7 +4,7 @@ set -e
 
 INDIR=${1?'Need a directory to monitor'}
 OUTDIR=${2-/home/hiseq.clinical/ENCRYPT}
-REMOTE_OUTDIR=${3-rasta:/mnt/hds/proj/bioinfo/PDC}
+REMOTE_OUTDIR=${3-rasta:/mnt/hds/proj/bioinfo/TO_PDC}
 MVDIR=/home/hiseq.clinical/BACKUP
 
 SCRIPTDIR=$(dirname $0)
@@ -33,7 +33,14 @@ for RTACOMPLETE in $RTACOMPLETES; do
         sync ${OUTDIR}/${RUN}.tar.gz.gpg ${REMOTE_OUTDIR}/
         sync ${OUTDIR}/${RUN}.key.gpg ${REMOTE_OUTDIR}/
 
+        # signal the transfer is complete
+        touch ${OUTDIR}/${RUN}_complete
+        sync ${OUTDIR}/${RUN}_complete ${REMOTE_OUTDIR}/
+
         log "mv ${INDIR}/${RUN} ${MVDIR}/"
         mv ${INDIR}/${RUN} ${MVDIR}/
+
+        log "rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg"
+        rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg
     fi
 done
