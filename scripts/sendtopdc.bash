@@ -27,7 +27,8 @@ fi
 for RUNFILE in ${INDIR}/*.tar.gz.gpg; do
     RUN=${RUNFILE%%.*}
 
-    if [[ ! -e ${INDIR}/${RUN}_complete ]]; then
+    if [[ ! -e ${RUN}_complete ]]; then
+        log "${RUN} hasn't finished yet"
         continue # if not yet fully copied, skip
     fi
 
