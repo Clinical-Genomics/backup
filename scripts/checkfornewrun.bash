@@ -35,12 +35,13 @@ for RTACOMPLETE in $RTACOMPLETES; do
         sync ${OUTDIR}/${RUN}.key.gpg ${REMOTE_OUTDIR}/
 
         # signal the transfer is complete
-        touch ${REMOTE_OUTDIR}/${RUN}_complete
+        touch ${OUTDIR}/${RUN}_complete
+        sync ${OUTDIR}/${RUN}_complete ${REMOTE_OUTDIR}/
 
         log "mv ${INDIR}/${RUN} ${MVDIR}/"
         mv ${INDIR}/${RUN} ${MVDIR}/
 
-        log "rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}_started"
-        rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}_started
+        log "rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}_started ${OUTDIR}/${RUN}_complete"
+        rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}_started ${OUTDIR}/${RUN}_complete
     fi
 done
