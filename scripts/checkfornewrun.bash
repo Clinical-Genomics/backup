@@ -41,7 +41,7 @@ for RTACOMPLETE in $RTACOMPLETES; do
         log "mv ${INDIR}/${RUN} ${MVDIR}/"
         mv ${INDIR}/${RUN} ${MVDIR}/
 
-        log "rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}_started ${OUTDIR}/${RUN}_complete"
-        rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}_started ${OUTDIR}/${RUN}_complete
+        log "rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}_started ${OUTDIR}/${RUN}_complete"
+        rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}_started ${OUTDIR}/${RUN}_complete
     fi
 done
