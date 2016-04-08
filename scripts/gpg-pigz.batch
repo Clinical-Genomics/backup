@@ -20,9 +20,16 @@ log() {
 }
 
 finish() {
-    if [[ ! -z ${PASSPHRASEFILE} && -f ${PASSPHRASEFILE} ]]; then
+    if [[ ! -z "${PASSPHRASEFILE}" && -f ${PASSPHRASEFILE} ]]; then
         rm ${PASSPHRASEFILE}
     fi
+    if [[ -f ${OUTDIR}/${RUN}.tar.gz.md5sum ]]; then
+        rm ${OUTDIR}/${RUN}.tar.gz.md5sum
+    fi
+    if [[ -f ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum ]]; then
+        rm ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum
+    fi
+    exit
 }
 trap finish EXIT ERR
 
@@ -66,26 +73,26 @@ ls -l ${PASSPHRASEFILE}*
 # * 1 CPU for gpg
 # * remainder of CPUs can be used by pigz
 PIGZCPUS=$(( ${CPUS} - 3 ))
-log "time tar -cf - ${RUN} | pigz -p ${PIGZCPUS} --fast -c - | tee >(md5sum > ${OUTDIR}/${RUN}.tar.gz.md5sum) | gpg --symmetric --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch --compress-algo none -o ${OUTDIR}/${RUN}.tar.gz.gpg"
-     time tar -cf - ${RUN} | pigz -p ${PIGZCPUS} --fast -c - | tee >(md5sum > ${OUTDIR}/${RUN}.tar.gz.md5sum) | gpg --symmetric --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch --compress-algo none -o ${OUTDIR}/${RUN}.tar.gz.gpg
+log "tar -cf - ${RUN} | pigz -p ${PIGZCPUS} --fast -c - | tee >(md5sum > ${OUTDIR}/${RUN}.tar.gz.md5sum) | gpg --symmetric --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch --compress-algo none -o ${OUTDIR}/${RUN}.tar.gz.gpg"
+     tar -cf - ${RUN} | pigz -p ${PIGZCPUS} --fast -c - | tee >(md5sum > ${OUTDIR}/${RUN}.tar.gz.md5sum) | gpg --symmetric --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch --compress-algo none -o ${OUTDIR}/${RUN}.tar.gz.gpg
 
 # decrypt and compare the md5sum
-log "time gpg --decrypt --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch ${OUTDIR}/${RUN}.tar.gz.gpg | md5sum > ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum"
-     time gpg --decrypt --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch ${OUTDIR}/${RUN}.tar.gz.gpg | md5sum > ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum
+log "gpg --decrypt --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch ${OUTDIR}/${RUN}.tar.gz.gpg | md5sum > ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum"
+     gpg --decrypt --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch ${OUTDIR}/${RUN}.tar.gz.gpg | md5sum > ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum
 
+set +e # turn off exit on errr
 log "diff -q ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum"
      diff -q ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum
 if [[ $? -gt 0 ]]; then
     echo "md5sum failed for backup ${RUN} on ${NAS}" | mail -s "md5sum failed for backup ${RUN} on ${NAS}" ${EMAILS}
 fi
+set -e
 
 ############
 # CLEAN UP #
 ############
 
 mv ${PASSPHRASEFILE}.gpg ${OUTDIR}/${RUN}.key.gpg
-rm ${PASSPHRASEFILE}
-rm ${OUTDIR}/${RUN}.tar.gz.md5sum
-rm ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum
+finish
 cd -
 log "Finished"
