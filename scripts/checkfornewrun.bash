@@ -26,7 +26,7 @@ RTACOMPLETES=$(find ${INDIR} -name RTAComplete.txt -mtime +5 -maxdepth 2)
 for RTACOMPLETE in $RTACOMPLETES; do
     RUN=$(basename $(dirname ${RTACOMPLETE}))
     log ${RUN}
-    if [[ ! -e ${OUTDIR}/${RUN}_started ]]; then
+    if [[ -d "${INDIR}/${RUN}" && ! -e ${OUTDIR}/${RUN}_started ]]; then
         log "gpg-pigz.batch ${INDIR}/${RUN} ${OUTDIR}"
         touch ${OUTDIR}/${RUN}_started
         bash ${SCRIPTDIR}/gpg-pigz.batch "${INDIR}/${RUN}" "${OUTDIR}"
