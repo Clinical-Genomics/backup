@@ -5,6 +5,7 @@
 ##########
 
 INDIR=${1?'Need an input directory to monitor'}
+EMAILS=kenny.billiau@scilifelab.se
 
 #############
 # FUNCTIONS #
@@ -33,6 +34,9 @@ for RUNFILE in ${INDIR}/*.tar.gz.gpg; do
     fi
 
     KEYFILE=${RUN}.key.gpg
+    if [[ ! -e ${KEYFILE} ]]; then
+        echo "${KEYFILE} is missing! Cannot archive" | mail -s "${KEYFILE} is missing!" ${EMAILS}
+    fi
     if ! dsmc q archive "${RUNFILE}" > /dev/null; then
         log "dsmc archive ${RUNFILE} && dsmc archive ${KEYFILE}"
         dsmc archive ${RUNFILE} && dsmc archive ${KEYFILE}
