@@ -2,12 +2,21 @@
 
 set -e
 
+########
+# VARS #
+########
+
 INDIR=${1?'Need a directory to monitor'}
 OUTDIR=${2-/home/hiseq.clinical/ENCRYPT}
 REMOTE_OUTDIR=${3-rasta:/mnt/hds/proj/bioinfo/TO_PDC}
 MVDIR=/home/hiseq.clinical/BACKUP
+EMAILS=kenny.billiau@scilifelab.se
 
 SCRIPTDIR=$(dirname $0)
+
+#############
+# FUNCTIONS #
+#############
 
 log() {
     NOW=$(date +"%Y%m%d%H%M%S")
@@ -20,6 +29,20 @@ sync() {
     log "rsync -av --checksum $1 $2"
     rsync -av --checksum $1 $2
 }
+
+#########
+# TRAPS #
+#########
+
+finish() {
+    NAS=$(hostname)
+    echo "Error while backing up ${RUN} on ${NAS}" | mail -s "Error while backing up ${RUN} on ${NAS}" ${EMAILS}
+}
+trap finish ERR
+
+########
+# MAIN #
+########
 
 log "find ${INDIR} -name RTAComplete.txt -mtime +5 -maxdepth 2"
 RTACOMPLETES=$(find ${INDIR} -name RTAComplete.txt -mtime +5 -maxdepth 2)

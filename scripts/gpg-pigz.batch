@@ -9,6 +9,7 @@
 #SBATCH --mail-user=kenny.billiau@scilifelab.se
 
 set -e 
+set -o pipefail
 
 #############
 # FUNCTIONS #
@@ -23,15 +24,17 @@ finish() {
     if [[ ! -z "${PASSPHRASEFILE}" && -f ${PASSPHRASEFILE} ]]; then
         rm ${PASSPHRASEFILE}
     fi
+    if [[ -f ${PASSPHRASEFILE}.gpg ]]; then
+        rm ${PASSPHRASEFILE}.gpg
+    fi
     if [[ -f ${OUTDIR}/${RUN}.tar.gz.md5sum ]]; then
         rm ${OUTDIR}/${RUN}.tar.gz.md5sum
     fi
     if [[ -f ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum ]]; then
         rm ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum
     fi
-    exit
 }
-trap finish EXIT ERR
+trap finish ERR EXIT
 
 ########
 # VARS #
@@ -42,13 +45,12 @@ OUTDIR=$2
 
 INDIR=$(dirname ${IN})
 RUN=$(basename ${IN})
-EMAILS=kenny.billiau@scilifelab.se
 
 ########
 # MAIN #
 ########
 
-export TMPDIR=${INDIR}
+export TMPDIR=${OUTDIR}
 PASSPHRASEFILE=$(mktemp)
 chmod a-rwx,u+rw ${PASSPHRASEFILE}
 
@@ -66,6 +68,12 @@ log "gpg -e -r 'Kenny Billiau' -o ${PASSPHRASEFILE}.gpg ${PASSPHRASEFILE}"
 gpg -e -r 'Kenny Billiau' -o ${PASSPHRASEFILE}.gpg ${PASSPHRASEFILE}
 ls -l ${PASSPHRASEFILE}*
 
+# previous step can take a long while, check if the rundir still is there
+if [[ ! -d ${RUN} ]]; then
+    >&2 echo "${RUN} is gone - aborting"
+    exit 1
+fi
+
 # TAR | ZIP | GPG
 # We need:
 # * 1 CPU for tar
@@ -80,19 +88,14 @@ log "tar -cf - ${RUN} | pigz -p ${PIGZCPUS} --fast -c - | tee >(md5sum > ${OUTDI
 log "gpg --decrypt --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch ${OUTDIR}/${RUN}.tar.gz.gpg | md5sum > ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum"
      gpg --decrypt --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch ${OUTDIR}/${RUN}.tar.gz.gpg | md5sum > ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum
 
-set +e # turn off exit on errr
+# compare - with 'set -e' the script will exit on non-zero exit status of diff
 log "diff -q ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum"
      diff -q ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum
-if [[ $? -gt 0 ]]; then
-    echo "md5sum failed for backup ${RUN} on ${NAS}" | mail -s "md5sum failed for backup ${RUN} on ${NAS}" ${EMAILS}
-fi
-set -e
 
 ############
 # CLEAN UP #
 ############
 
 mv ${PASSPHRASEFILE}.gpg ${OUTDIR}/${RUN}.key.gpg
-finish
 cd -
 log "Finished"
