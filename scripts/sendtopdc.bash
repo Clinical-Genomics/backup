@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ##########
 # PARAMS #
 ##########
@@ -15,6 +17,17 @@ log() {
     NOW=$(date +"%Y%m%d%H%M%S")
     echo "[${NOW}] $@"
 }
+
+#########
+# TRAPS #
+#########
+
+errr() {
+    NAS=$(hostname)
+    echo "Error while transferring ${RUN}" | mail -s "Error while transferring ${RUN} on line $1" ${EMAILS}
+    exit 1
+}
+trap 'errr ${LINENO}' ERR
 
 ########
 # MAIN #
@@ -33,13 +46,18 @@ for RUNFILE in ${INDIR}/*.tar.gz.gpg; do
         continue # if not yet fully copied, skip
     fi
 
-    KEYFILE=${RUN}.key.gpg
-    if [[ ! -e ${KEYFILE} ]]; then
-        echo "${KEYFILE} is missing! Cannot archive" | mail -s "${KEYFILE} is missing!" ${EMAILS}
-    fi
     if ! dsmc q archive "${RUNFILE}" > /dev/null; then
-        log "dsmc archive ${RUNFILE} && dsmc archive ${KEYFILE}"
-        dsmc archive ${RUNFILE} && dsmc archive ${KEYFILE}
+
+        # check if key is there
+        KEYFILE=${RUN}.key.gpg
+        if [[ ! -e ${KEYFILE} ]]; then
+            exit 2
+        fi
+
+        log "dsmc archive ${RUNFILE}"
+        dsmc archive ${RUNFILE}
+        log "dsmc archive ${KEYFILE}"
+        dsmc archive ${KEYFILE}
         #if [[ $? -eq 0 ]]; then
         #    log "rm ${RUNFILE}"
         #    rm ${RUNFILE}
