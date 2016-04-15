@@ -7,21 +7,22 @@
 
 VERSION=3.2.1
 
+. /home/clinical/CONFIG/configuration.txt
+NOW=$(date +"%Y%m%d%H%M%S")
+LOGFILE=${LOGDIR}check${NOW}.log
+
 # Echo's a timestamped message in the form of [timestamp] [module] message
 # Args:
 #   message (str): the message to be printed
 log() {
   NOW=$(date +"%Y%m%d%H%M%S")
   MSG=$1
-  echo [${NOW}] ${MSG}
-  echo [${NOW}] ${MSG} >> ${LOGFILE}
+  echo "[${NOW}] ${MSG}"
+  echo "[${NOW}] ${MSG}" >> "${LOGFILE}"
 }
 
 log "VERSION ${VERSION}"
 
-. /home/clinical/CONFIG/configuration.txt
-NOW=$(date +"%Y%m%d%H%M%S")
-LOGFILE=${LOGDIR}check${NOW}.log
 
 log "Logfile is ${LOGFILE}"
 log "Variables read in from /home/clinical/CONFIG/configuration.txt"
