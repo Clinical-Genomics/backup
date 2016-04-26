@@ -17,7 +17,8 @@ echo "VERSION ${VERSION}"
 
 . /home/clinical/CONFIG/configuration.txt
 NOW=$(date +"%Y%m%d%H%M%S")
-mysqldump csdb > ${BACKUPDIR}clinstatsdb_${NOW}.sql
+OUTFILE=${BACKUPDIR}clinical-db_${NOW}.sql
+mysqldump --databases csdb nipt_new > $OUTFILE
 
-scp ${BACKUPDIR}clinstatsdb_${NOW}.sql rasta:/mnt/hds/proj/bioinfo/BACKUP/clinstatsdb_${NOW}.sql
+scp $OUTFILE rasta:/mnt/hds/proj/bioinfo/BACKUP/clinstatsdb_${NOW}.sql
 
