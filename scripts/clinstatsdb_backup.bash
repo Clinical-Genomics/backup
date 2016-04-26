@@ -28,7 +28,7 @@ echo "VERSION ${VERSION}"
 #########
 
 errr() {
-    echo "Error while backing up ${DATABASE}" | mail -s "Error while backing up ${DATABASE}"
+    echo "Error while backing up ${DATABASE}" | mail -s "Error while backing up ${DATABASE}" ${EMAILS}
 }
 trap errr ERR 
 
