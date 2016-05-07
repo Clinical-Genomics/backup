@@ -2,7 +2,7 @@
 
 set -e
 
-IN_FILE=$1
+IN_FILE=${1-/home/hiseq.clinical/to_pdc}
 BACKUP_DIR=/home/hiseq.clinical/BACKUP/
 
 # COLORS
@@ -15,7 +15,7 @@ for RUN in ${BACKUP_DIR}/*; do
 
     # is the run on PDC?
     read -a RUN_SIZE <<< $(grep ${RUN}.tar.gz.gpg ${IN_FILE})
-    if [[ ${#RUN_SIZE[@]} -ne 2 ]]; then
+    if [[ ${#RUN_SIZE[@]} -ne 3 ]]; then
         echo -e "${RED}${RUN}${RESET}\t"
         continue
     else
@@ -25,6 +25,9 @@ for RUN in ${BACKUP_DIR}/*; do
     # check size
     SIZE=${RUN_SIZE[0]};
     SIZE=${SIZE//,}
+    if [[ ${RUN_SIZE[1]} == 'KB' ]]; then
+	SIZE=$(( ${SIZE} * 1024 ))
+    fi
     if grep -qs Description,NIPTv1 ${BACKUP_DIR}/${RUN}/SampleSheet.csv; then # NIPT RUN
         EXPECTED_SIZE=9000000 # 9GB
     elif [[ ${RUN} == *CCXX ]]; then
@@ -34,14 +37,24 @@ for RUN in ${BACKUP_DIR}/*; do
     fi
 
     if [[ $SIZE -lt $EXPECTED_SIZE ]]; then
-        echo -en "${RED}${SIZE}${RESET}\t"
+        echo -en "${RED}${SIZE}${RESET}"
     else
-        echo -en "${GREEN}${SIZE}${RESET}\t"
+        echo -en "${GREEN}${SIZE}${RESET}"
+    fi
+
+    # check size diff between encrypt and run
+    SIZE_RUN=$(du -s "${BACKUP_DIR}/${RUN}" | cut -d$'\t' -f1)
+    SIZE_RUN=$(( ${SIZE_RUN} * 1024 ))
+    SIZE_DIFF=$(( ( ( ${SIZE} - ${SIZE_RUN} ) / ${SIZE_RUN} ) * 100 ))
+    if (( $SIZE_DIFF > 10 )); then
+	echo -en " ${RED}(${SIZE_DIFF}%)${RESET}\t"
+    else
+	echo -en " ${GREEN}(${SIZE_DIFF}%)${RESET}\t"
     fi
 
     # check the key
     read -a KEY <<< $(grep ${RUN}.key.gpg ${IN_FILE})
-    if [[ ${#KEY[@]} -ne 2 ]]; then
+    if [[ ${#KEY[@]} -ne 3 ]]; then
         echo -e "${RED}MISSING KEY${RESET}"
     else
         if [[ ${KEY[0]} -ne 607 ]]; then
