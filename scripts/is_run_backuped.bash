@@ -2,7 +2,7 @@
 
 set -e
 
-IN_FILE=${1-/home/hiseq.clinical/to_pdc}
+IN_FILE=${1-/tmp/to_pdc}
 BACKUP_DIR=/home/hiseq.clinical/BACKUP/
 
 # COLORS
