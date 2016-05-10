@@ -26,7 +26,7 @@ for RUN in ${BACKUP_DIR}/*; do
     SIZE=${RUN_SIZE[0]};
     SIZE=${SIZE//,}
     if [[ ${RUN_SIZE[1]} == 'KB' ]]; then
-	SIZE=$(( ${SIZE} * 1024 ))
+    SIZE=$(( ${SIZE} * 1024 ))
     fi
     if grep -qs Description,NIPTv1 ${BACKUP_DIR}/${RUN}/SampleSheet.csv; then # NIPT RUN
         EXPECTED_SIZE=9000000 # 9GB
@@ -47,9 +47,9 @@ for RUN in ${BACKUP_DIR}/*; do
     SIZE_RUN=$(( ${SIZE_RUN} * 1024 ))
     SIZE_DIFF=$(( ( ( ${SIZE} - ${SIZE_RUN} ) / ${SIZE_RUN} ) * 100 ))
     if (( $SIZE_DIFF > 10 )); then
-	echo -en " ${RED}(${SIZE_DIFF}%)${RESET}\t"
+        echo -en " ${RED}(${SIZE_DIFF}%)${RESET}\t"
     else
-	echo -en " ${GREEN}(${SIZE_DIFF}%)${RESET}\t"
+        echo -en " ${GREEN}(${SIZE_DIFF}%)${RESET}\t"
     fi
 
     # check the key

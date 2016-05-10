@@ -29,8 +29,8 @@ log() {
 cleanup() {
     if [[ -e ${TO_PDC_LIST} ]]; then
         rm ${TO_PDC_LIST}
-        ssh ${NAS} rm ${REMOTE_TMPDIR}
     fi
+    ssh ${NAS} rm ${REMOTE_TMPDIR}
     exit
 }
 trap cleanup EXIT ERR
@@ -45,7 +45,7 @@ ssh clinical-db "dsmc q archive '${REMOTE_OUTDIR}/*' | tr -s ' ' | sed 's/^[[:sp
 
 for NAS in ${NASES[@]}; do
     echo ${NAS}
-    
+
     # push the list to the NAS
     scp -q ${TO_PDC_LIST} ${NAS}:${REMOTE_TMPDIR}
 
