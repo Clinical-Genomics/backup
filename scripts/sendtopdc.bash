@@ -18,6 +18,10 @@ log() {
     echo "[${NOW}] $@"
 }
 
+dsmc() {
+    DSM_DIR=/opt/adsm_clinical command dsmc $@
+}
+
 #########
 # TRAPS #
 #########
@@ -39,7 +43,7 @@ if pgrep dsmc; then
 fi
 
 for RUNFILE in ${INDIR}/*.tar.gz.gpg; do
-    RUN=${RUNFILE%%.*}
+    RUN=${RUNFILE%.tar.gz.gpg}
 
     if [[ ! -e ${RUN}_complete ]]; then
         log "${RUN} hasn't finished yet"
@@ -58,12 +62,12 @@ for RUNFILE in ${INDIR}/*.tar.gz.gpg; do
         dsmc archive ${RUNFILE}
         log "dsmc archive ${KEYFILE}"
         dsmc archive ${KEYFILE}
-        #if [[ $? -eq 0 ]]; then
-        #    log "rm ${RUNFILE}"
-        #    rm ${RUNFILE}
-        #    log "rm ${KEYFILE}"
-        #    rm ${KEYFILE}
-        #fi
+        if [[ $? -eq 0 ]]; then
+            log "rm ${RUNFILE}"
+            rm ${RUNFILE}
+            log "rm ${KEYFILE}"
+            rm ${KEYFILE}
+        fi
     else
         log "${RUN} has already been sent"
     fi
