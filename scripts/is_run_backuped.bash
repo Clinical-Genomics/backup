@@ -19,7 +19,7 @@ for RUN in ${BACKUP_DIR}/*; do
         echo -e "${RED}${RUN}${RESET}\t"
         continue
     else
-        echo -en "${RUN}\t"
+        echo -en "${GREEN}${RUN}${RESET}\t"
     fi
 
     # check size
