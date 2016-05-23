@@ -1,0 +1,101 @@
+#!/bin/bash
+#SBATCH -t 24:00:00
+#SBATCH -c 16
+#SBATCH -A prod001
+#SBATCH -J gpg_test
+#SBATCH --output=/mnt/hds/proj/bioinfo/LOG/gpg-test-%j.out
+#SBATCH --error=/mnt/hds/proj/bioinfo/LOG/gpg-test-%j.err
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=kenny.billiau@scilifelab.se
+
+set -e 
+set -o pipefail
+
+#############
+# FUNCTIONS #
+#############
+
+log() {
+    NOW=$(date +"%Y%m%d%H%M%S")
+    echo "[${NOW}] $@"
+}
+
+finish() {
+    if [[ ! -z "${PASSPHRASEFILE}" && -f ${PASSPHRASEFILE} ]]; then
+        rm ${PASSPHRASEFILE}
+    fi
+    if [[ -f ${PASSPHRASEFILE}.gpg ]]; then
+        rm ${PASSPHRASEFILE}.gpg
+    fi
+    if [[ -f ${OUTDIR}/${RUN}.tar.gz.md5sum ]]; then
+        rm ${OUTDIR}/${RUN}.tar.gz.md5sum
+    fi
+    if [[ -f ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum ]]; then
+        rm ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum
+    fi
+}
+trap finish ERR EXIT
+
+########
+# VARS #
+########
+
+IN=$1
+OUTDIR=$2
+
+INDIR=$(dirname ${IN})
+RUN=$(basename ${IN})
+
+########
+# MAIN #
+########
+
+export TMPDIR=${OUTDIR}
+PASSPHRASEFILE=$(mktemp)
+chmod a-rwx,u+rw ${PASSPHRASEFILE}
+
+# get the number of CPUs so pigz can use an optimized few
+CPUS=$(grep -c ^processor /proc/cpuinfo)
+
+cd ${INDIR}
+
+# can take some time when there is not a lot of entropy
+log "gpg --gen-random 1 256 > ${PASSPHRASEFILE}"
+gpg --gen-random 2 256 > ${PASSPHRASEFILE}
+
+# asymmetrically encrypt the passphrase file
+log "gpg -e -r 'Kenny Billiau' -o ${PASSPHRASEFILE}.gpg ${PASSPHRASEFILE}"
+gpg -e -r 'Kenny Billiau' -o ${PASSPHRASEFILE}.gpg ${PASSPHRASEFILE}
+ls -l ${PASSPHRASEFILE}*
+
+# previous step can take a long while, check if the rundir still is there
+if [[ ! -d ${RUN} ]]; then
+    >&2 echo "${RUN} is gone - aborting"
+    exit 1
+fi
+
+# TAR | ZIP | GPG
+# We need:
+# * 1 CPU for tar
+# * 1 CPU for tee and md5sum
+# * 1 CPU for gpg
+# * remainder of CPUs can be used by pigz
+PIGZCPUS=$(( ${CPUS} - 3 ))
+log "tar -cf - ${RUN} | pigz -p ${PIGZCPUS} --fast -c - | tee >(md5sum > ${OUTDIR}/${RUN}.tar.gz.md5sum) | gpg --symmetric --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch --compress-algo none -o ${OUTDIR}/${RUN}.tar.gz.gpg"
+     tar -cf - ${RUN} | pigz -p ${PIGZCPUS} --fast -c - | tee >(md5sum > ${OUTDIR}/${RUN}.tar.gz.md5sum) | gpg --symmetric --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch --compress-algo none -o ${OUTDIR}/${RUN}.tar.gz.gpg
+
+# decrypt and compare the md5sum
+log "gpg --decrypt --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch ${OUTDIR}/${RUN}.tar.gz.gpg | md5sum > ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum"
+     gpg --decrypt --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch ${OUTDIR}/${RUN}.tar.gz.gpg | md5sum > ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum
+
+# compare - with 'set -e' the script will exit on non-zero exit status of diff
+log "diff -q ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum"
+     diff -q ${OUTDIR}/${RUN}.tar.gz.md5sum ${OUTDIR}/${RUN}.tar.gz.degpg.md5sum
+
+############
+# CLEAN UP #
+############
+
+mv ${PASSPHRASEFILE}.gpg ${OUTDIR}/${RUN}.key.gpg
+cd -
+log "Finished"
