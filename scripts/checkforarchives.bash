@@ -7,6 +7,7 @@ set -e
 ########
 
 REMOTE_OUTDIR=${1-/mnt/hds/proj/bioinfo/TO_PDC}
+REMOTE_OUTDIR_2=/home/hiseq.clinical/ENCRYPT
 REMOTE_TMPDIR=${2-/tmp/to_pdc}
 
 NASES=(clinical-nas-2 seq-nas-1 seq-nas-2 seq-nas-3 nas-7 nas-8 nas-9 nas-10)
@@ -41,10 +42,15 @@ trap cleanup EXIT ERR
 
 # get the list of runs from PDC
 TO_PDC_LIST=$(mktemp)
-ssh clinical-db "dsmc q archive '${REMOTE_OUTDIR}/*' | tr -s ' ' | sed 's/^[[:space:]]*//' | cut -d ' ' -f1,2,5" > ${TO_PDC_LIST}
+ssh clinical-db "dsmc q archive '${REMOTE_OUTDIR}/' | tr -s ' ' | sed 's/^[[:space:]]*//' | cut -d ' ' -f1,2,5" > ${TO_PDC_LIST}
+ssh clinical-db "dsmc q archive '${REMOTE_OUTDIR_2}/' | tr -s ' ' | sed 's/^[[:space:]]*//' | cut -d ' ' -f1,2,5" >> ${TO_PDC_LIST}
 
 for NAS in ${NASES[@]}; do
     echo ${NAS}
+
+    # check if runs are ready for backup
+    MYCOMMAND=`base64 -w0 is_run_ready.bash`
+    ssh ${NAS} "echo $MYCOMMAND | base64 -d | bash"
 
     # push the list to the NAS
     scp -q ${TO_PDC_LIST} ${NAS}:${REMOTE_TMPDIR}
