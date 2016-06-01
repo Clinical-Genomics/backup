@@ -13,7 +13,7 @@ DEST_SERVER=$2
 DEST_DIR=$3
 
 if [[ ${#@} -ne 3 ]]; then
-    >&2 echo -e "USAGE:\n\t$0 source_filename server dest_filename"
+    >&2 echo -e "USAGE:\n\t$0 source_filename server dest_dir"
     exit 1
 fi
 
@@ -34,6 +34,9 @@ finish() {
     if [[ -e $FIFO ]]; then
         rm $FIFO
     fi
+    if [[ -e $KEY_FILE ]]; then
+        rm $KEY_FILE
+    fi
 }
 
 #########
@@ -50,8 +53,8 @@ read -s -p "Passphrase: " PASSPHRASE
 
 # get the encrypted key first
 KEY_FILE=$(mktemp -u)
-log "dsmc retrieve '${RUN}.key.gpg' $KEY_FILE"
-dsmc retrieve "${RUN}.key.gpg" $KEY_FILE
+log "dsmc retrieve '${RUNDIR}/${RUN}.key.gpg' $KEY_FILE"
+dsmc retrieve "${RUNDIR}/${RUN}.key.gpg" $KEY_FILE
 
 # create named pipe
 FIFO=$(mktemp -u)
