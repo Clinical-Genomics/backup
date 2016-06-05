@@ -37,6 +37,13 @@ trap finish ERR
 # MAIN #
 ########
 
+for DIR in ${INDIR}/*; do
+    if [[ ! -e ${DIR}/RTAComplete.txt ]]; then
+        log "Skipping archiving - Other runs are syncing"
+        exit
+    fi
+done
+
 log "find ${INDIR} -maxdepth 2 -name RTAComplete.txt -mtime +5"
 RTACOMPLETES=$(find ${INDIR} -maxdepth 2 -name RTAComplete.txt -mtime +5)
 for RTACOMPLETE in $RTACOMPLETES; do
