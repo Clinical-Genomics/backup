@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=3.4.1
+VERSION=3.4.2
 echo "VERSION ${VERSION}"
 
 # exit on empty var (to avoid to mv an empty ${RUN}
