@@ -18,7 +18,7 @@ set -e
 # CONFIG #
 ##########
 
-VERSION=3.4.0
+VERSION=3.4.1
 echo "VERSION ${VERSION}"
 
 . /home/clinical/CONFIG/configuration.txt
