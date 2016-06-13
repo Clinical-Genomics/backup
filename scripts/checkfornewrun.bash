@@ -41,7 +41,7 @@ trap finish ERR
 
 for DIR in ${INDIR}/*; do
     if [[ ! -d ${DIR} ]]; then continue; fi # skip non-dirs
-    if [[ ! -e ${DIR}/RTAComplete.txt ]]; then
+    if pgrep rsync; then
         log "Skipping archiving - Other runs are syncing"
         exit
     fi
