@@ -39,13 +39,10 @@ trap finish ERR
 # MAIN #
 ########
 
-for DIR in ${INDIR}/*; do
-    if [[ ! -d ${DIR} ]]; then continue; fi # skip non-dirs
-    if pgrep rsync; then
-        log "Skipping archiving - Other runs are syncing"
-        exit
-    fi
-done
+if pgrep rsync || pgrep gpg; then
+    log "Skipping archiving - Other runs are syncing"
+    exit
+fi
 
 log "find ${INDIR} -maxdepth 2 -name RTAComplete.txt -mtime +5"
 RTACOMPLETES=$(find ${INDIR} -maxdepth 2 -name RTAComplete.txt -mtime +5)
