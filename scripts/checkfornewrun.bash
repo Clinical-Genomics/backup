@@ -2,6 +2,8 @@
 
 set -e
 
+VERSION=3.3.1
+
 ########
 # VARS #
 ########
@@ -52,7 +54,7 @@ for RTACOMPLETE in $RTACOMPLETES; do
     log ${RUN}
     if [[ -d "${INDIR}/${RUN}" && ! -e ${OUTDIR}/${RUN}_started ]]; then
         log "gpg-pigz.batch ${INDIR}/${RUN} ${OUTDIR}"
-        touch ${OUTDIR}/${RUN}_started
+        echo $VERSION > ${OUTDIR}/${RUN}_started
         bash ${SCRIPTDIR}/gpg-pigz.batch "${INDIR}/${RUN}" "${OUTDIR}"
 
         # signal the transfer is complete
