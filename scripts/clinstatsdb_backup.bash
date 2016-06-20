@@ -18,7 +18,7 @@ set -e
 # CONFIG #
 ##########
 
-VERSION=3.4.2
+VERSION=3.4.3
 . /home/clinical/CONFIG/configuration.txt
 
 #########
