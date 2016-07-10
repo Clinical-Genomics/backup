@@ -21,8 +21,6 @@ set -e
 VERSION=3.5.0
 echo "VERSION ${VERSION}"
 
-. /home/clinical/CONFIG/configuration.txt
-
 #########
 # TRAPS #
 #########
@@ -39,7 +37,7 @@ trap errr ERR
 DATABASES=$(mysql --skip-column-names -e 'show databases')
 
 for DATABASE in $DATABASES; do
-    if echo "$DATABASE" | egrep -qs '^(csdb|nipt_.*)$'; then
+    if echo "$DATABASE" | egrep -qs '^(csdb|nipt_.*|taboo|chanjo_tx|genotype)$'; then
         echo "Backup up $DATABASE"
     else
         echo "Not backing up $DATABASE"
