@@ -18,7 +18,7 @@ set -e
 # CONFIG #
 ##########
 
-VERSION=3.5.0
+VERSION=3.5.1
 echo "VERSION ${VERSION}"
 
 #########
