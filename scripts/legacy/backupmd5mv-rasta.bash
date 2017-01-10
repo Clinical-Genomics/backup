@@ -30,7 +30,7 @@ for RUN in ${RUNS}; do
         sshcommand=$?
         if [[ ${sshcommand} != 0 ]] ; then
             echo "skipping ${NAS}..."
-	    continue # it's not on this NAS
+            continue # it's not on this NAS
         fi
 
         echo "ssh ${NAS} 'mv ${NASRUNDIR}/${RUN} ${NASOLDRUNDIR}'"

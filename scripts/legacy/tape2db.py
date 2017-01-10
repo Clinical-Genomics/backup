@@ -95,7 +95,7 @@ def main(argv):
     for run in runs:
         run_name = run.replace('.tar.gz', '')
         backup_runname = Backup.exists(run_name)
-        print('Arch name: ' + backup_runname)
+        print('Arch name: ' + str(backup_runname))
         if backup_runname:
             backup = SQL.query(Backup).filter(Backup.runname==run_name).one()
         else:
