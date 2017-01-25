@@ -1,8 +1,5 @@
 #!/bin/bash
 
-set -u
-set -o pipefail
-
 ON_PDC_FILE=${1-None}
 BACKUP_DIR=${2-/home/hiseq.clinical/BACKUP/}
 
