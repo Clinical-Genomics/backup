@@ -8,14 +8,14 @@ set -eu -o pipefail
 # VARS #
 ########
 
-RESTORE_FILE=$1
-DEST_SERVER=$2
-DEST_DIR=$3
-
 if [[ ${#@} -ne 3 ]]; then
     >&2 echo -e "USAGE:\n\t$0 source_filename server dest_dir"
     exit 1
 fi
+
+RESTORE_FILE=$1
+DEST_SERVER=$2
+DEST_DIR=$3
 
 RUNDIR=$(dirname $RESTORE_FILE)
 RUN=$(basename $RESTORE_FILE)

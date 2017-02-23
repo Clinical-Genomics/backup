@@ -19,7 +19,10 @@ set -e
 ##########
 
 VERSION=3.7.1
+EMAILS=kenny.billiau@scilifelab.se
 echo "VERSION ${VERSION}"
+
+. /home/clinical/CONFIG/configuration.txt
 
 #########
 # TRAPS #
