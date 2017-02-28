@@ -5,7 +5,7 @@
 #      use screen or nohup
 #
 
-VERSION=3.6.0
+VERSION=3.6.1
 
 . /home/clinical/CONFIG/configuration.txt
 NOW=$(date +"%Y%m%d%H%M%S")
