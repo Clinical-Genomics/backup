@@ -8,14 +8,15 @@ set -eu -o pipefail
 # VARS #
 ########
 
+if [[ ${#@} -ne 3 ]]; then
+    >&2 echo -e "USAGE:\n\t$0 source_filename server dest_dir"
+    >&2 echo -e "\t if server is - (dash) localhost will be used"
+    exit 1
+fi
+
 RESTORE_FILE=$1
 DEST_SERVER=$2
 DEST_DIR=$3
-
-if [[ ${#@} -ne 3 ]]; then
-    >&2 echo -e "USAGE:\n\t$0 source_filename server dest_dir"
-    exit 1
-fi
 
 RUNDIR=$(dirname $RESTORE_FILE)
 RUN=$(basename $RESTORE_FILE)
@@ -61,7 +62,12 @@ FIFO=$(mktemp -u)
 mkfifo $FIFO
 
 # init the tunnel
-cat $FIFO | gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "$PASSPHRASE" --batch --decrypt ${KEY_FILE}) --batch --decrypt | ssh $DEST_SERVER "cd ${DEST_DIR} && tar xzf - --exclude=${RUN}/RTAComplete.txt" &
+if [[ ${DEST_SERVER} == '-' ]]; then
+    cd ${DEST_DIR}
+    cat $FIFO | gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "$PASSPHRASE" --batch --decrypt ${KEY_FILE}) --batch --decrypt | tar xzf - --exclude=${RUN}/RTAComplete.txt &
+else
+    cat $FIFO | gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "$PASSPHRASE" --batch --decrypt ${KEY_FILE}) --batch --decrypt | ssh $DEST_SERVER "cd ${DEST_DIR} && tar xzf - --exclude=${RUN}/RTAComplete.txt" &
+fi
 
 # retrieve the backup
 log "dsmc retrieve '$RESTORE_FILE' $FIFO"
