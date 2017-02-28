@@ -1,0 +1,153 @@
+#!/bin/bash
+
+ON_PDC_FILE=${1-None}
+BACKUP_DIR=${2-/home/hiseq.clinical/BACKUP/}
+
+# COLORS
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+RESET="\033[0m"
+
+#############
+# FUNCTIONS #
+#############
+
+_cleanup_pdc() {
+    if [[ -e ${ON_PDC_FILE} ]]; then
+        rm ${ON_PDC_FILE}
+    fi
+}
+
+get_pdc_runs() {
+    ON_PDC_FILE=$(mktemp)
+    local REMOTE_OUTDIR=/mnt/hds/proj/bioinfo/TO_PDC
+    local REMOTE_OUTDIR_2=/home/hiseq.clinical/ENCRYPT
+    ssh clinical-db "dsmc q archive '${REMOTE_OUTDIR}/' | tr -s ' ' | sed 's/^[[:space:]]*//' | cut -d ' ' -f1,2,5" > ${ON_PDC_FILE}
+    ssh clinical-db "dsmc q archive '${REMOTE_OUTDIR_2}/' | tr -s ' ' | sed 's/^[[:space:]]*//' | cut -d ' ' -f1,2,5" >> ${ON_PDC_FILE}
+
+    echo "${ON_PDC_FILE}"
+    return 0
+}
+
+is_run_on_pdc() {
+    local RUN=${1?Please provide a run dir basename}
+    local ON_PDC_FILE=${2-'None'}
+
+    if [[ ${ON_PDC_FILE} == 'None' ]]; then
+        ON_PDC_FILE=$(get_pdc_runs)
+    fi
+
+    read -a RUN_SIZE <<< $(grep ${RUN}.tar.gz.gpg ${ON_PDC_FILE})
+
+    if [[ ${#RUN_SIZE[@]} -gt 0 ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+get_expected_run_size() {
+    local RUN=${1?Please provide a fully qualified run dir}
+
+    EXPECTED_SIZE=0
+    if grep -qs Description,NIPTv1 ${RUN_DIR}/${RUN}/SampleSheet.csv; then # NIPT RUN
+        EXPECTED_SIZE=9000000000 # 9GB
+    elif [[ ${RUN} == *CCXX ]]; then # X RUN
+        EXPECTED_SIZE=580000000000 # 550GB
+    else # RAPID
+        EXPECTED_SIZE=35000000000 # 35GB
+    fi
+
+    echo "${EXPECTED_SIZE}"
+    return 0
+}
+
+get_pdc_run_size() {
+    local RUN=${1?Please provide a run dir basename}
+    local ON_PDC_FILE=${2-'None'}
+
+    if [[ ${ON_PDC_FILE} == 'None' ]]; then
+        ON_PDC_FILE=$(get_pdc_runs)
+    fi
+
+    read -a RUN_SIZE <<< $(grep ${RUN}.tar.gz.gpg ${ON_PDC_FILE})
+
+    local SIZE=${RUN_SIZE[0]};
+    SIZE=${SIZE//,}
+    if [[ ${RUN_SIZE[1]} == 'KB' ]]; then
+        SIZE=$(( ${SIZE} * 1024 ))
+    fi
+
+    echo "$SIZE"
+    return 0
+}
+
+is_run_backuped() {
+    local RUN=${1?Please provide fully qualified path of run.}
+    local ON_PDC_FILE=${2-'None'}
+
+    if [[ ${ON_PDC_FILE} == 'None' ]]; then
+        ON_PDC_FILE=$(get_pdc_runs)
+    fi
+
+    # init some vars
+    local RUN_DIR=$(dirname $RUN)
+    local RUN=$(basename ${RUN%/})
+
+    ########
+    # MAIN #
+    ########
+
+    # is the run on PDC?
+    if $(is_run_on_pdc "${RUN}" "${ON_PDC_FILE}"); then
+        echo -en "${GREEN}${RUN}${RESET}\t"
+    else
+        echo -e "${RED}${RUN}${RESET}\t"
+        return 1
+    fi
+
+    # check size
+    local SIZE=$(get_pdc_run_size "${RUN}" "${ON_PDC_FILE}")
+    local EXPECTED_SIZE=$(get_expected_run_size "${RUN}" "${ON_PDC_FILE}")
+    if [[ $SIZE -lt $EXPECTED_SIZE ]]; then
+        echo -en "${RED}${SIZE}${RESET}"
+    else
+        echo -en "${GREEN}${SIZE}${RESET}"
+    fi
+
+    # check size diff between encrypt and run
+    local SIZE_RUN=$(du -s "${RUN_DIR}/${RUN}" | cut -d$'\t' -f1)
+    SIZE_RUN=$(( ${SIZE_RUN} * 1024 ))
+    local SIZE_DIFF=$(( ( ( ${SIZE} - ${SIZE_RUN} ) / ${SIZE_RUN} ) * 100 ))
+    if (( $SIZE_DIFF > 5 )); then
+        echo -en " ${RED}(${SIZE_DIFF}%)${RESET}\t"
+    else
+        echo -en " ${GREEN}(${SIZE_DIFF}%)${RESET}\t"
+    fi
+
+    # check the key
+    read -a KEY <<< $(grep ${RUN}.key.gpg ${ON_PDC_FILE})
+    if [[ ${#KEY[@]} -ne 3 ]]; then
+        echo -e "${RED}MISSING KEY${RESET}"
+    else
+        if ! [[ ${KEY[0]} == 607 || ${KEY[0]} == 606 ]]; then
+            echo -e "${RED}KEY WRONG SIZE ${KEY[0]}${RESET}"
+        else
+            echo -e "${GREEN}KEY FOUND${RESET}"
+        fi
+    fi
+}
+
+are_runs_backuped() {
+    for RUN in ${BACKUP_DIR}/*; do
+        $(is_run_backuped "${RUN}" "${ON_PDC_FILE}")
+    done
+}
+
+########
+# MAIN #
+########
+
+#for RUN in ${BACKUP_DIR}/*; do
+#    $(is_run_backuped "${RUN}" "${ON_PDC_FILE}")
+#done

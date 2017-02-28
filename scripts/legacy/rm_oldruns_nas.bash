@@ -9,11 +9,13 @@ ssh $1 ls -1 oldRuns > $OLDRUNS_FILE
 
 # 2/ check if those are on tape
 while read -r RUN; do
-   echo $RUN;
+   NOW=$(date +"%Y%m%d%H%M%S")
+   echo [${NOW}] RUN: $RUN;
    
    find /mnt/hds/proj/bioinfo/ON_TAPE/ -name "${RUN}*" | grep '.*'; FOUND=$?;
    if [[ $FOUND -eq 0 ]]; then
-       echo "ssh $1 'rm -Rf oldRuns/$RUN'"
+       NOW=$(date +"%Y%m%d%H%M%S")
+       echo "[${NOW}] CMD: ssh $1 'rm -Rf oldRuns/$RUN'"
        ssh $1 "rm -Rf oldRuns/$RUN" &
    fi
 done < $OLDRUNS_FILE
