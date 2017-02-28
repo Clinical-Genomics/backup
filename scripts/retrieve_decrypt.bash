@@ -10,7 +10,6 @@ set -eu -o pipefail
 
 if [[ ${#@} -ne 3 ]]; then
     >&2 echo -e "USAGE:\n\t$0 source_filename server dest_dir"
-    >&2 echo -e "\t if server is - (dash) localhost will be used"
     exit 1
 fi
 
@@ -62,7 +61,7 @@ FIFO=$(mktemp -u)
 mkfifo $FIFO
 
 # init the tunnel
-if [[ ${DEST_SERVER} == '-' ]]; then
+if [[ ${DEST_SERVER} == 'localhost' ]]; then
     cd ${DEST_DIR}
     cat $FIFO | gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "$PASSPHRASE" --batch --decrypt ${KEY_FILE}) --batch --decrypt | tar xzf - --exclude=${RUN}/RTAComplete.txt &
 else
