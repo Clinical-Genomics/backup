@@ -50,4 +50,5 @@ unset IFS
 
 RUN=${ON_PDC_RUN[2]}
 
-echo bash retrieve_decrypt.bash ${RUN} ${DEST_SERVER} ${DEST_DIR}
+echo "bash retrieve_decrypt.bash ${RUN} ${DEST_SERVER} ${DEST_DIR}"
+bash retrieve_decrypt.bash ${RUN} ${DEST_SERVER} ${DEST_DIR}
