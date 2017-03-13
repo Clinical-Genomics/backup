@@ -31,11 +31,11 @@ log() {
 }
 
 finish() {
-    if [[ -e $FIFO ]]; then
-        rm $FIFO
-    fi
     if [[ -e $KEY_FILE ]]; then
         rm $KEY_FILE
+    fi
+    if [[ -e $FIFO ]]; then
+        rm $FIFO
     fi
 }
 
