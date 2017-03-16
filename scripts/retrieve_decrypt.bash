@@ -64,13 +64,21 @@ mkfifo $FIFO
 if [[ ${DEST_SERVER} == 'localhost' ]]; then
     cd ${DEST_DIR}
     cat $FIFO | gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "$PASSPHRASE" --batch --decrypt ${KEY_FILE}) --batch --decrypt | tar xzf - --exclude=${RUN}/RTAComplete.txt &
+
+    # retrieve the backup
+    log "dsmc retrieve '$RESTORE_FILE' $FIFO"
+    dsmc retrieve "$RESTORE_FILE" $FIFO
+
+    log "touch ${DEST_DIR}/${RUN}/RTAComplete.txt"
+    touch ${DEST_DIR}/${RUN}/RTAComplete.txt
+
 else
     cat $FIFO | gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "$PASSPHRASE" --batch --decrypt ${KEY_FILE}) --batch --decrypt | ssh $DEST_SERVER "cd ${DEST_DIR} && tar xzf - --exclude=${RUN}/RTAComplete.txt" &
+
+    # retrieve the backup
+    log "dsmc retrieve '$RESTORE_FILE' $FIFO"
+    dsmc retrieve "$RESTORE_FILE" $FIFO
+
+    log "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN}/RTAComplete.txt'"
+    ssh $DEST_SERVER "touch ${DEST_DIR}/${RUN}/RTAComplete.txt"
 fi
-
-# retrieve the backup
-log "dsmc retrieve '$RESTORE_FILE' $FIFO"
-dsmc retrieve "$RESTORE_FILE" $FIFO
-
-log "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN}/RTAComplete.txt'"
-ssh $DEST_SERVER "touch ${DEST_DIR}/${RUN}/RTAComplete.txt"
