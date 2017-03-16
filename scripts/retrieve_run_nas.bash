@@ -65,8 +65,8 @@ RUN=$(basename ${RUN_ARCHIVE%*.tar.gz.gpg})
 log "bash retrieve_decrypt.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}"
 bash retrieve_decrypt.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}
 
-log "rsync -a ${DEST_DIR_NAS}/${RUN} ${DEST_DIR} --exclude ${DEST_DIR_NAS}/${RUN}/RTAComplete.txt --exclude demuxstarted.txt"
-rsync -a ${DEST_DIR_NAS}/${RUN} ${DEST_DIR} --exclude ${DEST_DIR_NAS}/${RUN}/RTAComplete.txt --exclude demuxstarted.txt
+log "rsync -a ${DEST_DIR_NAS}/${RUN} ${DEST_SERVER}:${DEST_DIR} --exclude ${DEST_DIR_NAS}/${RUN}/RTAComplete.txt --exclude demuxstarted.txt --exclude Thumbnail_Images"
+rsync -a ${DEST_DIR_NAS}/${RUN} ${DEST_SERVER}:${DEST_DIR} --exclude ${DEST_DIR_NAS}/${RUN}/RTAComplete.txt --exclude demuxstarted.txt --exclude Thumbnail_Images
 
 log "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN}/RTAComplete.txt'"
 ssh $DEST_SERVER "touch ${DEST_DIR}/${RUN}/RTAComplete.txt"
