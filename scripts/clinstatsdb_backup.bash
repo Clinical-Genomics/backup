@@ -18,7 +18,7 @@ set -e
 # CONFIG #
 ##########
 
-VERSION=3.8.7
+VERSION=3.9.0
 EMAILS=kenny.billiau@scilifelab.se
 echo "VERSION ${VERSION}"
 
