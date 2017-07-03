@@ -9,14 +9,23 @@ set -eu -o pipefail
 # VARS #
 ########
 
-if [[ ${#@} -ne 3 ]]; then
+declare -A SERVERS
+SERVERS[thalamus]=/home/clinical/RUNS/
+SERVERS[rasta]=/mnt/hds2/proj/bioinfo/Runs/
+
+if [[ ${#@} -lt 2 ]]; then
     >&2 echo -e "USAGE:\n\t$0 fc server dest_dir"
+    >&2 echo
+    >&2 echo -e "\tIf server is filled in, follwing dest_dirs will be used:"
+    for SERVER in "${!SERVERS[@]}"; do
+        >&2 echo -e "\t* ${SERVER}: ${SERVERS[${SERVER}]}"
+    done
     exit 1
 fi
 
 FC=$1
 DEST_SERVER=$2
-DEST_DIR=$3
+DEST_DIR=${3-${SERVERS[${DEST_SERVER}]}}
 
 DEST_DIR_NAS=/home/hiseq.clinical/oldRuns/
 DEST_SERVER_NAS=localhost
@@ -47,6 +56,10 @@ finish() {
     if [[ -e ${ON_PDC_FILE} ]]; then
         rm ${ON_PDC_FILE}
     fi
+    if [[ -e ${DEST_DIR_NAS}/${RUN} ]]; then
+        log "rm -rf ${DEST_DIR_NAS}/${RUN}"
+        rm -rf ${DEST_DIR_NAS}/${RUN}
+    fi
 }
 
 #########
@@ -72,6 +85,3 @@ rsync -r ${DEST_DIR_NAS}/${RUN} ${DEST_SERVER}:${DEST_DIR} --exclude RTAComplete
 
 log "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN}/RTAComplete.txt'"
 ssh $DEST_SERVER "touch ${DEST_DIR}/${RUN}/RTAComplete.txt"
-
-log "rm -rf ${DEST_DIR_NAS}/${RUN}"
-rm -rf ${DEST_DIR_NAS}/${RUN}
