@@ -49,8 +49,6 @@ trap finish EXIT ERR
 # MAIN #
 ########
 
-read -s -p "Passphrase: " PASSPHRASE
-
 # get the encrypted key first
 KEY_FILE=$(mktemp -u)
 log "dsmc retrieve '${RUNDIR}/${RUN}.key.gpg' $KEY_FILE"
@@ -67,7 +65,8 @@ if [[ ${DEST_SERVER} == 'localhost' ]]; then
 
     # retrieve the backup
     log "dsmc retrieve '$RESTORE_FILE' $FIFO"
-    dsmc retrieve "$RESTORE_FILE" $FIFO
+    dsmc retrieve -replace=yes "$RESTORE_FILE" $FIFO
+
 
     log "touch ${DEST_DIR}/${RUN}/RTAComplete.txt"
     touch ${DEST_DIR}/${RUN}/RTAComplete.txt

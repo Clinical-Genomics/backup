@@ -72,3 +72,6 @@ rsync -r ${DEST_DIR_NAS}/${RUN} ${DEST_SERVER}:${DEST_DIR} --exclude RTAComplete
 
 log "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN}/RTAComplete.txt'"
 ssh $DEST_SERVER "touch ${DEST_DIR}/${RUN}/RTAComplete.txt"
+
+log "rm -rf ${DEST_DIR_NAS}/${RUN}"
+rm -rf ${DEST_DIR_NAS}/${RUN}
