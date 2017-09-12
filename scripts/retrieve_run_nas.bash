@@ -5,13 +5,14 @@
 
 set -eu -o pipefail
 
-########
-# VARS #
-########
+#########
+# USAGE #
+#########
 
 declare -A SERVERS
 SERVERS[thalamus]=/home/clinical/RUNS/
 SERVERS[rasta]=/mnt/hds2/proj/bioinfo/Runs/
+SERVERS[rastapopoulos]=/mnt/hds2/proj/bioinfo/Runs/
 
 if [[ ${#@} -lt 2 ]]; then
     >&2 echo -e "USAGE:\n\t$0 fc server dest_dir"
@@ -22,6 +23,10 @@ if [[ ${#@} -lt 2 ]]; then
     done
     exit 1
 fi
+
+########
+# VARS #
+########
 
 FC=$1
 DEST_SERVER=$2
@@ -56,10 +61,6 @@ finish() {
     if [[ -e ${ON_PDC_FILE} ]]; then
         rm ${ON_PDC_FILE}
     fi
-    if [[ -e ${DEST_DIR_NAS}/${RUN} ]]; then
-        log "rm -rf ${DEST_DIR_NAS}/${RUN}"
-        rm -rf ${DEST_DIR_NAS}/${RUN}
-    fi
 }
 
 #########
@@ -74,14 +75,19 @@ trap finish EXIT ERR
 
 ON_PDC_FILE=$(get_pdc_runs)
 ON_PDC_RUN=( $(grep "${FC}.tar.gz.gpg" ${ON_PDC_FILE}) )
-RUN_ARCHIVE=${ON_PDC_RUN[2]}
+RUN_ARCHIVE=${ON_PDC_RUN[${#ON_PDC_RUN[@]}-1]}
+
 RUN=$(basename ${RUN_ARCHIVE%*.tar.gz.gpg})
 
 log "bash ${SCRIPT_DIR}/retrieve_decrypt.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}"
-bash ${SCRIPT_DIR}/retrieve_decrypt.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}
+     bash ${SCRIPT_DIR}/retrieve_decrypt.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}
 
 log "rsync -r ${DEST_DIR_NAS}/${RUN} ${DEST_SERVER}:${DEST_DIR} --exclude RTAComplete.txt --exclude demuxstarted.txt --exclude Thumbnail_Images"
-rsync -r ${DEST_DIR_NAS}/${RUN} ${DEST_SERVER}:${DEST_DIR} --exclude RTAComplete.txt --exclude demuxstarted.txt --exclude Thumbnail_Images
+     rsync -r ${DEST_DIR_NAS}/${RUN} ${DEST_SERVER}:${DEST_DIR} --exclude RTAComplete.txt --exclude demuxstarted.txt --exclude Thumbnail_Images
 
 log "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN}/RTAComplete.txt'"
-ssh $DEST_SERVER "touch ${DEST_DIR}/${RUN}/RTAComplete.txt"
+     ssh $DEST_SERVER "touch ${DEST_DIR}/${RUN}/RTAComplete.txt"
+
+log "rm -rf ${DEST_DIR_NAS}/${RUN}"
+     rm -rf ${DEST_DIR_NAS}/${RUN}
+
