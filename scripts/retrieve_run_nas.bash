@@ -10,7 +10,7 @@ set -eu -o pipefail
 #########
 
 declare -A SERVERS
-SERVERS[thalamus]=/home/clinical/RUNS/
+SERVERS[thalamus]=/home/hiseq.clinical/RUNS/
 SERVERS[rasta]=/mnt/hds2/proj/bioinfo/Runs/
 SERVERS[rastapopoulos]=/mnt/hds2/proj/bioinfo/Runs/
 
