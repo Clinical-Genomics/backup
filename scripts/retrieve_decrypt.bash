@@ -64,7 +64,7 @@ if [[ ${DEST_SERVER} == 'localhost' ]]; then
     cat $FIFO | gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "$PASSPHRASE" --batch --decrypt ${KEY_FILE}) --batch --decrypt | tar xzf - --exclude=${RUN}/RTAComplete.txt &
 
     # retrieve the backup
-    log "dsmc retrieve '$RESTORE_FILE' $FIFO"
+    log "dsmc retrieve -replace=yes '$RESTORE_FILE' $FIFO"
     dsmc retrieve -replace=yes "$RESTORE_FILE" $FIFO
 
 
@@ -75,7 +75,7 @@ else
     cat $FIFO | gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "$PASSPHRASE" --batch --decrypt ${KEY_FILE}) --batch --decrypt | ssh $DEST_SERVER "cd ${DEST_DIR} && tar xzf - --exclude=${RUN}/RTAComplete.txt" &
 
     # retrieve the backup
-    log "dsmc retrieve '$RESTORE_FILE' $FIFO"
+    log "dsmc retrieve -replace=yes '$RESTORE_FILE' $FIFO"
     dsmc retrieve -replace=yes "$RESTORE_FILE" $FIFO
 
     log "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN}/RTAComplete.txt'"
