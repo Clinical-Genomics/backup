@@ -76,7 +76,7 @@ else
 
     # retrieve the backup
     log "dsmc retrieve '$RESTORE_FILE' $FIFO"
-    dsmc retrieve "$RESTORE_FILE" $FIFO
+    dsmc retrieve -replace=yes "$RESTORE_FILE" $FIFO
 
     log "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN}/RTAComplete.txt'"
     ssh $DEST_SERVER "touch ${DEST_DIR}/${RUN}/RTAComplete.txt"
