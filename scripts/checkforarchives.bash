@@ -57,5 +57,5 @@ for NAS in ${NASES[@]}; do
 
     # execute script remotely
     MYCOMMAND=`base64 -w0 is_run_backuped.bash`
-    ssh ${NAS} "echo $MYCOMMAND | base64 -d | bash"
+    ssh ${NAS} "(export DELETE=${DELETE}; echo $MYCOMMAND | base64 -d | bash)"
 done

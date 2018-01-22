@@ -2,6 +2,9 @@
 
 set -e
 
+# USAGE #
+# requires a DELETE=true if you want to remove the runs on the target server
+
 IN_FILE=${1-/tmp/to_pdc}
 BACKUP_DIR=/home/hiseq.clinical/BACKUP/
 
@@ -37,7 +40,8 @@ for RUN in ${BACKUP_DIR}/*; do
     fi
 
     if [[ $SIZE -lt $EXPECTED_SIZE ]]; then
-        echo -en "${RED}${SIZE}${RESET}"
+        echo -e "${RED}${SIZE}${RESET}"
+        continue
     else
         echo -en "${GREEN}${SIZE}${RESET}"
     fi
@@ -47,7 +51,8 @@ for RUN in ${BACKUP_DIR}/*; do
     SIZE_RUN=$(( ${SIZE_RUN} * 1024 ))
     SIZE_DIFF=$(( ( ( ${SIZE} - ${SIZE_RUN} ) / ${SIZE_RUN} ) * 100 ))
     if (( $SIZE_DIFF > 10 )); then
-        echo -en " ${RED}(${SIZE_DIFF}%)${RESET}\t"
+        echo -e " ${RED}(${SIZE_DIFF}%)${RESET}\t"
+        continue
     else
         echo -en " ${GREEN}(${SIZE_DIFF}%)${RESET}\t"
     fi
@@ -56,11 +61,20 @@ for RUN in ${BACKUP_DIR}/*; do
     read -a KEY <<< $(grep ${RUN}.key.gpg ${IN_FILE})
     if [[ ${#KEY[@]} -ne 3 ]]; then
         echo -e "${RED}MISSING KEY${RESET}"
+        continue
     else
         if [[ ${KEY[0]} -ne 607 ]]; then
-            echo -e "${RED}KEY WRONG SIZE ${KEY[0]}${RESET}"
+            echo -e "${RED}KEY WRONG SIZE ${KEY[0]}${RESET}\t"
+            continue
         else
-            echo -e "${GREEN}KEY FOUND${RESET}"
+            echo -en "${GREEN}KEY FOUND${RESET}\t"
         fi
+    fi
+
+    if [[ ${DELETE} == "true" ]]; then
+        echo -e "${RED}DELETING!${RESET}"
+        rm -rf ${BACKUP_DIR}/${RUN}
+    else
+        echo
     fi
 done
