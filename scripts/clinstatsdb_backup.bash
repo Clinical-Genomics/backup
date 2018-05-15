@@ -20,9 +20,8 @@ set -e
 
 VERSION=3.9.8
 EMAILS=kenny.billiau@scilifelab.se
+BACKUPDIR=/home/clinical/BACKUP/
 echo "VERSION ${VERSION}"
-
-. /home/clinical/CONFIG/configuration.txt
 
 #########
 # TRAPS #
@@ -40,7 +39,7 @@ trap errr ERR
 DATABASES=$(mysql --skip-column-names -e 'show databases')
 
 for DATABASE in $DATABASES; do
-    if echo "$DATABASE" | egrep -qs '^(csdb|nipt_.*|taboo|chanjo_tx|genotype)$'; then
+    if echo "$DATABASE" | egrep -qs '^(microsalt|csdb|nipt_.*|taboo|chanjo_tx|genotype|cg.*|housekeeper2|trailblazer2|cust015_.*)$'; then
         echo "Backup up $DATABASE"
     else
         echo "Not backing up $DATABASE"
