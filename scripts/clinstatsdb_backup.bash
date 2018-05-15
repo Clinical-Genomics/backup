@@ -18,7 +18,7 @@ set -e
 # CONFIG #
 ##########
 
-VERSION=3.9.8
+VERSION=3.10.0
 EMAILS=kenny.billiau@scilifelab.se
 BACKUPDIR=/home/clinical/BACKUP/
 echo "VERSION ${VERSION}"
