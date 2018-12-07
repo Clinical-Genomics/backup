@@ -39,7 +39,7 @@ trap errr ERR
 DATABASES=$(mysql --skip-column-names -e 'show databases')
 
 for DATABASE in $DATABASES; do
-    if echo "$DATABASE" | egrep -qs '^(microsalt|csdb|nipt_.*|taboo|chanjo_tx|genotype|cg.*|housekeeper2|trailblazer2|cust015_.*)$'; then
+    if echo "$DATABASE" | egrep -qs -v '(-dev|-stage)'; then
         echo "Backup up $DATABASE"
     else
         echo "Not backing up $DATABASE"
