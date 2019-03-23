@@ -28,7 +28,7 @@ log "Logfile is ${LOGFILE}"
 log "Variables read in from /home/clinical/CONFIG/configuration.txt"
 log "               LOGDIR  -  ${LOGDIR}"
 
-declare -A SERVERS=( [clinical-db]=/home,/var [clinical-preproc]=/home [clinical-nas-1]=/home [clinical-nas-2]=/home [seq-nas-1]=/home [seq-nas-2]=/home [seq-nas-3]=/home [nas-6]=/home [nas-7]=/home [nas-8]=/home [nas-9]=/home [nas-10]=/home [rasta]=/mnt/hds2,256T )
+declare -A SERVERS=( [clinical-db]=493G,/var [clinical-preproc]=/home [clinical-nas-1]=/home [clinical-nas-2]=/home [seq-nas-1]=/home [seq-nas-2]=/home [seq-nas-3]=/home [nas-6]=/home [nas-7]=/home [nas-8]=/home [nas-9]=/home [nas-10]=/home [rasta]=/mnt/hds2,256T )
 
 for SERVER in "${!SERVERS[@]}"; do
   DIRS=( $( echo ${SERVERS[$SERVER]} | sed -e 's/,/ /g' ) )
