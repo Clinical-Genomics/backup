@@ -44,8 +44,8 @@ if pgrep rsync || pgrep gpg; then
     exit
 fi
 
-log "find ${INDIR} -maxdepth 2 -name RTAComplete.txt -mtime +5"
-RTACOMPLETES=$(find ${INDIR} -maxdepth 2 -name RTAComplete.txt -mtime +5)
+log "find ${INDIR} -maxdepth 2 -name RTAComplete.txt -mtime +1"
+RTACOMPLETES=$(find ${INDIR} -maxdepth 2 -name RTAComplete.txt -mtime +1)
 for RTACOMPLETE in $RTACOMPLETES; do
     RUN=$(basename $(dirname ${RTACOMPLETE}))
     log ${RUN}
