@@ -50,5 +50,5 @@ for DATABASE in $DATABASES; do
     OUTFILE=${BACKUPDIR}/${DATABASE}_${NOW}.sql.gz
     mysqldump $DATABASE | gzip -9 > $OUTFILE
 
-    scp $OUTFILE rasta:/mnt/hds/proj/bioinfo/BACKUP/
+    scp $OUTFILE hasta:/home/proj/production/backup/mysql/clinical-db/
 done
