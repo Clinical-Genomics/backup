@@ -11,8 +11,7 @@ set -eu -o pipefail
 
 declare -A SERVERS
 SERVERS[thalamus]=/home/hiseq.clinical/RUNS/
-SERVERS[rasta]=/mnt/hds2/proj/bioinfo/Runs/
-SERVERS[rastapopoulos]=/mnt/hds2/proj/bioinfo/Runs/
+SERVERS[hasta]=/home/proj/production/flowcells/hiseqx/
 
 if [[ ${#@} -lt 2 ]]; then
     >&2 echo -e "USAGE:\n\t$0 fc server dest_dir"
