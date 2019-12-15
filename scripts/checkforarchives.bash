@@ -10,7 +10,7 @@ REMOTE_OUTDIR=${1-/mnt/hds/proj/bioinfo/TO_PDC}
 REMOTE_OUTDIR_2=/home/hiseq.clinical/ENCRYPT
 REMOTE_TMPDIR=${2-/tmp/to_pdc}
 
-NASES=(clinical-nas-2 seq-nas-1 seq-nas-2 seq-nas-3 nas-6 nas-7 nas-8 nas-9 nas-10)
+NASES=(clinical-nas-2 seq-nas-1 seq-nas-3 nas-6 nas-9 nas-10)
 
 SCRIPTDIR=$(dirname $0)
 
