@@ -52,3 +52,6 @@ for DATABASE in $DATABASES; do
 
     scp $OUTFILE hasta:/home/proj/production/backup/mysql/clinical-db/
 done
+ 
+cd ${BACKUPDIR}
+find ${BACKUPDIR} -type f -mtime +30 -exec rm ${BACKUPDIR}{} \;
