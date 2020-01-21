@@ -18,7 +18,7 @@ set -e
 # CONFIG #
 ##########
 
-VERSION=3.12.0
+VERSION=3.12.1
 EMAILS=clinical-logwatch@scilifelab.se
 BACKUPDIR=/home/clinical/BACKUP/
 echo "VERSION ${VERSION}"
