@@ -38,20 +38,20 @@ trap errr ERR
 
 DATABASES=$(mysql --skip-column-names -e 'show databases')
 
-#for DATABASE in $DATABASES; do
-#    if echo "$DATABASE" | egrep -qs -v '(-dev|-stage)'; then
-#        echo "Backup up $DATABASE"
-#    else
-#        echo "Not backing up $DATABASE"
-#        continue
-#    fi
-#    
-#    NOW=$(date +"%Y%m%d%H%M%S")
-#    OUTFILE=${BACKUPDIR}/${DATABASE}_${NOW}.sql.gz
-#    mysqldump $DATABASE | gzip -9 > $OUTFILE
-#
-#    scp $OUTFILE hasta:/home/proj/production/backup/mysql/clinical-db/
-#done
+for DATABASE in $DATABASES; do
+    if echo "$DATABASE" | egrep -qs -v '(-dev|-stage)'; then
+        echo "Backup up $DATABASE"
+    else
+        echo "Not backing up $DATABASE"
+        continue
+    fi
+    
+    NOW=$(date +"%Y%m%d%H%M%S")
+    OUTFILE=${BACKUPDIR}/${DATABASE}_${NOW}.sql.gz
+    mysqldump $DATABASE | gzip -9 > $OUTFILE
+
+    scp $OUTFILE hasta:/home/proj/production/backup/mysql/clinical-db/
+done
  
 cd ${BACKUPDIR}
-find . -type f -mtime +26 -exec rm ${BACKUPDIR}{} \;
+find . -type f -mtime +30 -exec rm ${BACKUPDIR}{} \;
