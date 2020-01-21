@@ -28,11 +28,11 @@ log "Logfile is ${LOGFILE}"
 log "Variables read in from /home/clinical/CONFIG/configuration.txt"
 log "               LOGDIR  -  ${LOGDIR}"
 
-declare -A SERVERS=( [clinical-db]=493G,/var [clinical-preproc]=/home [clinical-nas-1]=/home [clinical-nas-2]=/home [seq-nas-1]=/home [seq-nas-2]=/home [seq-nas-3]=/home [nas-6]=/home [nas-7]=/home [nas-8]=/home [nas-9]=/home [nas-10]=/home [rasta]=/mnt/hds2,256T )
+declare -A SERVERS=( [clinical-db]=493G,/var [clinical-preproc]=/home [clinical-nas-1]=/home [clinical-nas-2]=/home [seq-nas-1]=/home [seq-nas-3]=/home [nas-8]=/home [nas-9]=/home [nas-10]=/home [hasta]=/home )
 
 for SERVER in "${!SERVERS[@]}"; do
   DIRS=( $( echo ${SERVERS[$SERVER]} | sed -e 's/,/ /g' ) )
-  for DIR in ${DIRS[@]}; do
+  for DIR in "${DIRS[@]}"; do
       SERVER_HOME=$(ssh ${SERVER} df -h 2> /dev/null | grep -F "$DIR" | awk '{ print $NF,$(NF -1) }')
       MSG="   ${SERVER} ${SERVER_HOME}"
       if [[ "$(echo ${SERVER_HOME} | awk '{split($2,arr,"%");print arr[1]}')" -ge 85 ]]; then
