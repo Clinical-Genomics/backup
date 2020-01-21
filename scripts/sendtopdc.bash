@@ -7,7 +7,7 @@ set -e
 ##########
 
 INDIR=${1?'Need an input directory to monitor'}
-EMAILS=kenny.billiau@scilifelab.se
+EMAILS=clinical.logwatch@scilifelab.se
 
 #############
 # FUNCTIONS #

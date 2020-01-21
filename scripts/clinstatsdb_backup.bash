@@ -19,7 +19,7 @@ set -e
 ##########
 
 VERSION=3.12.0
-EMAILS=kenny.billiau@scilifelab.se
+EMAILS=clinical-logwatch@scilifelab.se
 BACKUPDIR=/home/clinical/BACKUP/
 echo "VERSION ${VERSION}"
 

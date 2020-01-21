@@ -12,7 +12,7 @@ INDIR=${1?'Need a directory to monitor'}
 OUTDIR=${2-/home/hiseq.clinical/ENCRYPT}
 REMOTE_OUTDIR=${3-rasta:/mnt/hds/proj/bioinfo/TO_PDC}
 MVDIR=/home/hiseq.clinical/BACKUP
-EMAILS=kenny.billiau@scilifelab.se
+EMAILS=clinical-logwatch@scilifelab.se
 
 SCRIPTDIR=$(dirname $0)
 
