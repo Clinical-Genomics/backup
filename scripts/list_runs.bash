@@ -5,7 +5,7 @@
 readarray -t LINES <<< "$(dsmc q archive "/mnt/hds/proj/bioinfo/TO_PDC/*")"
 
 OUTFILE=$(mktemp)
-EMAILS=kenny.billiau@scilifelab.se
+EMAILS=clinical-logwatch@scilifelab.se
 
 declare -A FILESIZE_OF
 
