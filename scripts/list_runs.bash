@@ -2,7 +2,13 @@
 
 # list all runs since a certain data
 
-readarray -t LINES <<< "$(dsmc q archive "/mnt/hds/proj/bioinfo/TO_PDC/*")"
+dsmc() {
+    DSM_DIR=/opt/adsm_clinical command dsmc $@
+}
+
+readarray -t LINES <<< "$(dsmc q archive '/mnt/hds/proj/bioinfo/TO_PDC/')"
+readarray -t LINES_PART2 <<< "$(dsmc q archive "/home/hiseq.clinical/ENCRYPT/*")"
+LINES=("${LINES[@]}" "${LINES_PART2[@]}")
 
 OUTFILE=$(mktemp)
 EMAILS=clinical-logwatch@scilifelab.se
@@ -10,7 +16,7 @@ EMAILS=clinical-logwatch@scilifelab.se
 declare -A FILESIZE_OF
 
 for LINE in "${LINES[@]}"; do
-    LINE_PARTS=( $(echo $LINE) )
+    LINE_PARTS=( $(echo $LINE) ) 
 
     # skip non-run lines
     if [[ $LINE != *.gpg* ]]; then
@@ -31,6 +37,6 @@ for FILENAME in ${SORTED_FILENAMES[@]}; do
     printf '%15s %s\n' ${FILESIZE_OF[$FILENAME]} $FILENAME >> $OUTFILE
 done
 
-cat $OUTFILE | mail -s 'PDC report' $EMAILS
+cat $OUTFILE | tee | mail -s 'PDC report' $EMAILS
 
 rm $OUTFILE
