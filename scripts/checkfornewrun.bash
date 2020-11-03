@@ -39,7 +39,7 @@ trap finish ERR
 # MAIN #
 ########
 
-if pgrep rsync || pgrep gpg; then
+if pgrep rsync || pgrep -x gpg; then
     log "Skipping archiving - Other runs are syncing"
     exit
 fi
