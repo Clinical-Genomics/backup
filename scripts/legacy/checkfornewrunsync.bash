@@ -52,9 +52,9 @@ for RTACOMPLETE in $RTACOMPLETES; do
     if [[ -d "${INDIR}/${RUN}" && ! -e ${OUTDIR}/${RUN}_started ]]; then
         log "gpg-pigz.batch ${INDIR}/${RUN} ${OUTDIR}"
         touch ${OUTDIR}/${RUN}_started
-        bash ${SCRIPTDIR}/gpg-pigz.batch "${INDIR}/${RUN}" "${OUTDIR}"
+        bash ${SCRIPTDIR}/gpg-pigz.bash "${INDIR}/${RUN}" "${OUTDIR}"
 
-        sync ${OUTDIR}/${RUN}.tar.gz.gpg ${REMOTE_OUTDIR}/
+        sync ${OUTDIR}/${RUN}.tar.*.gpg ${REMOTE_OUTDIR}/
         sync ${OUTDIR}/${RUN}.key.gpg ${REMOTE_OUTDIR}/
 
         # signal the transfer is complete
@@ -64,7 +64,7 @@ for RTACOMPLETE in $RTACOMPLETES; do
         log "mv ${INDIR}/${RUN} ${MVDIR}/"
         mv ${INDIR}/${RUN} ${MVDIR}/
 
-        log "rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}_started ${OUTDIR}/${RUN}_complete"
-        rm ${OUTDIR}/${RUN}.tar.gz.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}_started ${OUTDIR}/${RUN}_complete
+        log "rm ${OUTDIR}/${RUN}.tar.*.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}_started ${OUTDIR}/${RUN}_complete"
+        rm ${OUTDIR}/${RUN}.tar.*.gpg ${OUTDIR}/${RUN}.key.gpg ${OUTDIR}/${RUN}_started ${OUTDIR}/${RUN}_complete
     fi
 done

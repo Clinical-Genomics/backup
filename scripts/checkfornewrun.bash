@@ -50,9 +50,9 @@ for RTACOMPLETE in $RTACOMPLETES; do
     RUN=$(basename $(dirname ${RTACOMPLETE}))
     log ${RUN}
     if [[ -d "${INDIR}/${RUN}" && ! -e ${OUTDIR}/${RUN}_started ]]; then
-        log "gpg-pigz.batch ${INDIR}/${RUN} ${OUTDIR}"
+        log "gpg-pigz.bash ${INDIR}/${RUN} ${OUTDIR}"
         echo $VERSION > ${OUTDIR}/${RUN}_started
-        bash ${SCRIPTDIR}/gpg-pigz.batch "${INDIR}/${RUN}" "${OUTDIR}"
+        bash ${SCRIPTDIR}/gpg-zstd.bash "${INDIR}/${RUN}" "${OUTDIR}"
 
         # signal the transfer is complete
         touch ${OUTDIR}/${RUN}_complete

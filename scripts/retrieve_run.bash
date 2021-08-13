@@ -45,7 +45,7 @@ trap finish EXIT ERR
 # MAIN #
 ########
 
-IFS=\$' ' read -ra ON_PDC_RUN <<< $(grep "${FC}.tar.gz.gpg" ${ON_PDC_FILE})
+IFS=\$' ' read -ra ON_PDC_RUN <<< $(grep "${FC}.tar." ${ON_PDC_FILE})
 unset IFS
 
 RUN=${ON_PDC_RUN[2]}

@@ -17,7 +17,7 @@ for RUN in ${BACKUP_DIR}/*; do
     RUN=${RUN##*/}
 
     # is the run on PDC?
-    read -a RUN_SIZE <<< $(grep ${RUN}.tar.gz.gpg ${IN_FILE})
+    read -a RUN_SIZE <<< $(grep ${RUN}.tar. ${IN_FILE})
     if [[ ${#RUN_SIZE[@]} -ne 3 ]]; then
         echo -e "${RED}${RUN}${RESET}\t"
         continue

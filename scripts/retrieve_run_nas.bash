@@ -73,20 +73,23 @@ trap finish EXIT ERR
 ########
 
 ON_PDC_FILE=$(get_pdc_runs)
-ON_PDC_RUN=( $(grep "${FC}.tar.gz.gpg" ${ON_PDC_FILE}) )
+ON_PDC_RUN=( $(grep "${FC}.tar." ${ON_PDC_FILE}) )
 RUN_ARCHIVE=${ON_PDC_RUN[${#ON_PDC_RUN[@]}-1]}
 
-RUN=$(basename ${RUN_ARCHIVE%*.tar.gz.gpg})
+RUN=$(basename ${RUN_ARCHIVE%*.tar.*.gpg})
 
-log "bash ${SCRIPT_DIR}/retrieve_decrypt.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}"
-     bash ${SCRIPT_DIR}/retrieve_decrypt.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}
+CMD="bash ${SCRIPT_DIR}/retrieve_decrypt.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}"
+log $CMD
+$CMD
 
-log "rsync -r ${DEST_DIR_NAS}/${RUN} ${DEST_SERVER}:${DEST_DIR} --exclude RTAComplete.txt --exclude demuxstarted.txt --exclude Thumbnail_Images"
-     rsync -r ${DEST_DIR_NAS}/${RUN} ${DEST_SERVER}:${DEST_DIR} --exclude RTAComplete.txt --exclude demuxstarted.txt --exclude Thumbnail_Images
+CMD="rsync -r ${DEST_DIR_NAS}/${RUN} ${DEST_SERVER}:${DEST_DIR} --partial-dir=${DEST_SERVER}:${DEST_DIR}.partial --delay-updates --exclude RTAComplete.txt --exclude demuxstarted.txt --exclude Thumbnail_Images"
+log $CMD
+$CMD
 
-log "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN}/RTAComplete.txt'"
-     ssh $DEST_SERVER "touch ${DEST_DIR}/${RUN}/RTAComplete.txt"
+CMD="ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN}/RTAComplete.txt'"
+log $CMD
+$CMD
 
-log "rm -rf ${DEST_DIR_NAS}/${RUN}"
-     rm -rf ${DEST_DIR_NAS}/${RUN}
-
+CMD="rm -rf ${DEST_DIR_NAS}/${RUN}"
+log $CMD
+$CMD
