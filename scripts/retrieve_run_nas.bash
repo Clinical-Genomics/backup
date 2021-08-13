@@ -3,7 +3,7 @@
 # retrieves a file from PDC to local disk space.
 # rsyncs it then to destination.
 
-set -eu -o pipefail
+set -Eeuo pipefail
 
 #########
 # USAGE #

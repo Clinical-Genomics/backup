@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -Eeuo pipefail
 
 VERSION=3.13.0
 
@@ -50,7 +50,7 @@ for RTACOMPLETE in $RTACOMPLETES; do
     RUN=$(basename $(dirname ${RTACOMPLETE}))
     log ${RUN}
     if [[ -d "${INDIR}/${RUN}" && ! -e ${OUTDIR}/${RUN}_started ]]; then
-        log "gpg-pigz.bash ${INDIR}/${RUN} ${OUTDIR}"
+        log "gpg-zstd.bash ${INDIR}/${RUN} ${OUTDIR}"
         echo $VERSION > ${OUTDIR}/${RUN}_started
         bash ${SCRIPTDIR}/gpg-zstd.bash "${INDIR}/${RUN}" "${OUTDIR}"
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -Eeuo pipefail
+
 if [[ ${#@} -lt 2 ]]; then
     >&2 echo    'The program assumes both the ${RUN}.key.gpg and ${RUN}.tar.*.gpg present'
     >&2 echo -e "USAGE:\n\t$0 source_filename dest_dir"

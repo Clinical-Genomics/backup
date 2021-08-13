@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -Eeuo pipefail
 
 # USAGE #
 # requires a DELETE=true if you want to remove the runs on the target server
