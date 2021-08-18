@@ -35,7 +35,7 @@ DECRYPTED_FILE="${RUN_FILE%%.gpg}"
 
 log() {
     NOW=$(date +"%Y%m%d%H%M%S")
-    echo "[${NOW}] $@"
+    echo "`echo $'\n '`[${NOW}] $@"
 }
 
 log_exc() {
@@ -120,27 +120,37 @@ log_exc "cd ${TMP_DIR}"
 # if not exists or confirm_overwrite
 if [[ $(not_exists_or_confirm_overwrite ${KEY_FILE}) ]]; then
   log_exc "dsmc retrieve -replace=yes '${RUN_DIR}/${RUN_NAME}.key.gpg' '${KEY_FILE}'"
+else
+  log "skipping retrieving key"
 fi
 
 # retrieve run
 if [[ $(not_exists_or_confirm_overwrite ${RETRIEVED_FILE}) ]]; then
   log_exc "dsmc retrieve -replace=yes '${RESTORE_FILE}' '${RETRIEVED_FILE}'"
+else
+  log "skipping retrieving run"
 fi
 
 # decrypt run
 if [[ $(not_exists_or_confirm_overwrite ${DECRYPTED_FILE}) ]]; then
   log_exc "time gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase '${PASSPHRASE}' --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
+else
+  log "skipping gpg"
 fi
 
 # decompress run
 if [[ $(not_exists_or_confirm_overwrite ${RUN_NAME}) ]]; then
   log_exc "time tar xf ${DECRYPTED_FILE} --exclude='RTAComplete.txt' --exclude='demuxstarted.txt' --exclude='Thumbnail_Images'"
+else
+  log "skipping untaring"
 fi
 
 if [[ ${DEST_SERVER} == 'localhost' ]]; then
   # rsync run
   if [[ $(not_exists_or_confirm_overwrite ${DEST_DIR}) ]]; then
     log_exc "time rsync -r --progress ${RUN_NAME} ${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+  else
+    log "skipping rsync"
   fi
 
   # mark as finished
@@ -149,6 +159,8 @@ else
   # rsync run
   if [[ $(not_exists_or_confirm_overwrite ${DEST_DIR}) ]]; then
     log_exc "time rsync -r --progress ${RUN_NAME} hiseq.clinical@$DEST_SERVER:${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+  else
+    log "skipping rsync"
   fi
 
   # mark as finished
@@ -158,3 +170,5 @@ fi
 log "finished retrieval, decryption and decompression!"
 
 cleanup
+
+}
