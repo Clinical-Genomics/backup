@@ -85,6 +85,21 @@ error() {
   done
 }
 
+not_exists_or_confirm_overwrite() {
+  if [ ! -e "$1" ]
+  then
+    return 1
+  else
+    read -p "$1 exists, Overwrite? " -n 1 -r
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+      return 1
+    else
+      return 0
+    fi
+  fi
+}
+
 #########
 # TRAPS #
 #########
@@ -102,27 +117,39 @@ fi
 log_exc "cd ${TMP_DIR}"
 
 # get the encrypted key first
-log_exc "dsmc retrieve '${RUN_DIR}/${RUN_NAME}.key.gpg' $KEY_FILE"
+# if not exists or confirm_overwrite
+if [[ $(not_exists_or_confirm_overwrite ${KEY_FILE}) ]]; then
+  log_exc "dsmc retrieve -replace '${RUN_DIR}/${RUN_NAME}.key.gpg' ${KEY_FILE}"
+fi
 
 # retrieve run
-log_exc "dsmc retrieve '$RESTORE_FILE' ${RETRIEVED_FILE}"
+if [[ $(not_exists_or_confirm_overwrite ${RETRIEVED_FILE}) ]]; then
+  log_exc "dsmc retrieve -replace'$RESTORE_FILE' ${RETRIEVED_FILE}"
+fi
 
 # decrypt run
-log_exc "time gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase '$PASSPHRASE' --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
+if [[ $(not_exists_or_confirm_overwrite ${DECRYPTED_FILE}) ]]; then
+  log_exc "time gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase '$PASSPHRASE' --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
+fi
 
 # decompress run
-log_exc "time tar xf $DECRYPTED_FILE --exclude='RTAComplete.txt' --exclude='demuxstarted.txt' --exclude='Thumbnail_Images'"
+if [[ $(not_exists_or_confirm_overwrite ${$RUN_NAME}) ]]; then
+  log_exc "time tar xf $DECRYPTED_FILE --exclude='RTAComplete.txt' --exclude='demuxstarted.txt' --exclude='Thumbnail_Images'"
+fi
 
 if [[ ${DEST_SERVER} == 'localhost' ]]; then
-
   # rsync run
-  log_exc "time rsync -r --progress {$RUN_NAME} ${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+  if [[ $(not_exists_or_confirm_overwrite ${DEST_DIR}) ]]; then
+    log_exc "time rsync -r --progress {$RUN_NAME} ${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+  fi
 
   # mark as finished
   log_exc "touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt"
 else
   # rsync run
-  log_exc "time rsync -r --progress {$RUN_NAME} hiseq.clinical@$DEST_SERVER:${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+  if [[ $(not_exists_or_confirm_overwrite ${DEST_DIR}) ]]; then
+    log_exc "time rsync -r --progress {$RUN_NAME} hiseq.clinical@$DEST_SERVER:${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+  fi
 
   # mark as finished
   log_exc "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt'"
