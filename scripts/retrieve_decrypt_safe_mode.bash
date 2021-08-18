@@ -5,7 +5,7 @@
 set -o errexit
 set -o nounset
 set -o pipefail
-set -E
+set -Ex
 
 ########
 # VARS #
@@ -90,8 +90,8 @@ not_exists_or_confirm_overwrite() {
   then
     return 1
   else
-    read -p "`echo $'\n '`File $1 already exist, Overwrite? " -n 1 reply
-    if [[ $reply =~ ^[Yy]$ ]]
+    read -p "`echo $'\n '`File $1 already exist, Overwrite? " -n 1 -r
+    if [[ $REPLY =~ ^[Yy]$ ]]
     then
       return 1
     else
