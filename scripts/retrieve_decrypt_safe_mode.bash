@@ -124,23 +124,23 @@ fi
 
 # retrieve run
 if [[ $(not_exists_or_confirm_overwrite ${RETRIEVED_FILE}) ]]; then
-  log_exc "dsmc retrieve -replace'$RESTORE_FILE' ${RETRIEVED_FILE}"
+  log_exc "dsmc retrieve -replace '${RESTORE_FILE}' ${RETRIEVED_FILE}"
 fi
 
 # decrypt run
 if [[ $(not_exists_or_confirm_overwrite ${DECRYPTED_FILE}) ]]; then
-  log_exc "time gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase '$PASSPHRASE' --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
+  log_exc "time gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase '${PASSPHRASE}' --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
 fi
 
 # decompress run
-if [[ $(not_exists_or_confirm_overwrite ${$RUN_NAME}) ]]; then
-  log_exc "time tar xf $DECRYPTED_FILE --exclude='RTAComplete.txt' --exclude='demuxstarted.txt' --exclude='Thumbnail_Images'"
+if [[ $(not_exists_or_confirm_overwrite ${RUN_NAME}) ]]; then
+  log_exc "time tar xf ${DECRYPTED_FILE} --exclude='RTAComplete.txt' --exclude='demuxstarted.txt' --exclude='Thumbnail_Images'"
 fi
 
 if [[ ${DEST_SERVER} == 'localhost' ]]; then
   # rsync run
   if [[ $(not_exists_or_confirm_overwrite ${DEST_DIR}) ]]; then
-    log_exc "time rsync -r --progress {$RUN_NAME} ${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+    log_exc "time rsync -r --progress ${RUN_NAME} ${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
   fi
 
   # mark as finished
@@ -148,7 +148,7 @@ if [[ ${DEST_SERVER} == 'localhost' ]]; then
 else
   # rsync run
   if [[ $(not_exists_or_confirm_overwrite ${DEST_DIR}) ]]; then
-    log_exc "time rsync -r --progress {$RUN_NAME} hiseq.clinical@$DEST_SERVER:${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+    log_exc "time rsync -r --progress ${RUN_NAME} hiseq.clinical@$DEST_SERVER:${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
   fi
 
   # mark as finished
