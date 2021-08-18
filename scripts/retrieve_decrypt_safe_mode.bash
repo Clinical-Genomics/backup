@@ -90,8 +90,8 @@ not_exists_or_confirm_overwrite() {
   then
     return 1
   else
-    read -p "`echo $'\n '`File $1 already exist, Overwrite? " -n 1
-    if [[ $REPLY =~ ^[Yy]$ ]]
+    read -p "`echo $'\n '`File $1 already exist, Overwrite? " -n 1 reply
+    if [[ $reply =~ ^[Yy]$ ]]
     then
       return 1
     else
