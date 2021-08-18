@@ -39,7 +39,7 @@ log() {
 }
 
 log_exc() {
-    log $@
+    log "$@"
     $@
 }
 
@@ -47,36 +47,31 @@ cleanup() {
     # remove key
     if [[ -e $KEY_FILE ]]; then
         log "removing key $KEY_FILE"
-        CMD="rm $KEY_FILE"
-        log_exc $CMD
+        log_exc "rm $KEY_FILE"
     fi
     # remove retrieved file
     if [[ -e ${RETRIEVED_FILE} ]]; then
         log "removing retrieved file ${RETRIEVED_FILE}"
-        CMD="rm ${RETRIEVED_FILE}"
-        log_exc $CMD
+        log_exc "rm ${RETRIEVED_FILE}"
     fi
 
     # remove decrypted file
     if [[ -e ${DECRYPTED_FILE} ]]; then
         log "removing decrypted file ${DECRYPTED_FILE}"
-        CMD="rm ${DECRYPTED_FILE}"
-        log_exc $CMD
+        log_exc "rm ${DECRYPTED_FILE}"
     fi
 
     # remove decompressed folder
     if [[ -d ${RUN_NAME} ]]; then
         log "removing decompressed folder ${RUN_NAME}"
-        CMD="rm -rf ${RUN_NAME}"
-        log_exc $CMD
+        log_exc "rm -rf ${RUN_NAME}"
     fi
 
     # temporary folder
     cd ${START_DIR}
     if [[ -d ${TMP_DIR} ]]; then
         log "removing temporary folder ${TMP_DIR}"
-        CMD="rm -rf ${TMP_DIR}"
-        log_exc $CMD
+        log_exc "rm -rf ${TMP_DIR}"
     fi
 
     log "finished!"
@@ -102,46 +97,35 @@ trap error ERR
 
 # create TMP
 if [[ ! -d ${TMP_DIR} ]]; then
-  CMD="mkdir ${TMP_DIR}"
-  log_exc $CMD
+  log_exc "mkdir ${TMP_DIR}"
 fi
-CMD="cd ${TMP_DIR}"
-log_exc $CMD
+log_exc "cd ${TMP_DIR}"
 
 # get the encrypted key first
-CMD="dsmc retrieve '${RUN_DIR}/${RUN_NAME}.key.gpg' $KEY_FILE"
-log_exc $CMD
+log_exc "dsmc retrieve '${RUN_DIR}/${RUN_NAME}.key.gpg' $KEY_FILE"
 
 # retrieve run
-
-CMD="dsmc retrieve '$RESTORE_FILE' ${RETRIEVED_FILE}"
-log_exc $CMD
+log_exc "dsmc retrieve '$RESTORE_FILE' ${RETRIEVED_FILE}"
 
 # decrypt run
-
-CMD="time gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase '$PASSPHRASE' --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
-log_exc $CMD
+log_exc "time gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase '$PASSPHRASE' --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
 
 # decompress run
-CMD="time tar xf $DECRYPTED_FILE --exclude='RTAComplete.txt' --exclude='demuxstarted.txt' --exclude='Thumbnail_Images'"
-log_exc $CMD
+log_exc "time tar xf $DECRYPTED_FILE --exclude='RTAComplete.txt' --exclude='demuxstarted.txt' --exclude='Thumbnail_Images'"
 
 if [[ ${DEST_SERVER} == 'localhost' ]]; then
 
   # rsync run
-  CMD="time rsync -r --progress {$RUN_NAME} ${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
-  log_exc $CMD
-
-  CMD="touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt"
-  log_exc $CMD
-else
-  # rsync run
-  CMD="time rsync -r --progress {$RUN_NAME} hiseq.clinical@$DEST_SERVER:${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
-  log_exc $CMD
+  log_exc "time rsync -r --progress {$RUN_NAME} ${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
 
   # mark as finished
-  CMD="ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt'"
-  log_exc $CMD
+  log_exc "touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt"
+else
+  # rsync run
+  log_exc "time rsync -r --progress {$RUN_NAME} hiseq.clinical@$DEST_SERVER:${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+
+  # mark as finished
+  log_exc "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt'"
 fi
 
 log "finished retrieval, decryption and decompression!"
