@@ -119,12 +119,12 @@ log_exc "cd ${TMP_DIR}"
 # get the encrypted key first
 # if not exists or confirm_overwrite
 if [[ $(not_exists_or_confirm_overwrite ${KEY_FILE}) ]]; then
-  log_exc "dsmc retrieve -replace=yes '${RUN_DIR}/${RUN_NAME}.key.gpg' ${KEY_FILE}"
+  log_exc "dsmc retrieve -replace=yes '${RUN_DIR}/${RUN_NAME}.key.gpg' '${KEY_FILE}'"
 fi
 
 # retrieve run
 if [[ $(not_exists_or_confirm_overwrite ${RETRIEVED_FILE}) ]]; then
-  log_exc "dsmc retrieve -replace=yes '${RESTORE_FILE}' ${RETRIEVED_FILE}"
+  log_exc "dsmc retrieve -replace=yes '${RESTORE_FILE}' '${RETRIEVED_FILE}'"
 fi
 
 # decrypt run
