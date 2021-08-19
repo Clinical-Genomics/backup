@@ -25,7 +25,7 @@ RUN_DIR=$(dirname $RESTORE_FILE)
 RUN_FILE=$(basename $RESTORE_FILE)
 RUN_NAME=${RUN_FILE%%.*}
 TMP_DIR="${RUN_NAME}.TMP"
-KEY_FILE=${RUN_NAME}.key.gpg
+KEY_FILE="${RUN_NAME}.key.gpg"
 RETRIEVED_FILE="./${RUN_FILE}"
 DECRYPTED_FILE="${RUN_FILE%%.gpg}"
 
@@ -34,7 +34,7 @@ DECRYPTED_FILE="${RUN_FILE%%.gpg}"
 #############
 
 log() {
-    NOW=$(date +"%Y%m%d%H%M%S")
+    NOW=$(date +"%Y-%m-%d %H:%M:%S")
     echo "`echo $'\n '`[${NOW}] $@"
 }
 
@@ -46,7 +46,7 @@ log_exc() {
 cleanup() {
 
     log "Removing files in temporary folder '${TMP_DIR}':"
-    log_exc "cd ${TMP_DIR}"
+    log_exc "cd ${START_DIR}/${TMP_DIR}"
     list_files
 
     log "removing dsmc error log dsmerror.log"
@@ -76,7 +76,7 @@ remove_file() {
   TO_REMOVE=$1
   if [[ -f ${TO_REMOVE} ]]; then
       log "Removing file ${TO_REMOVE}"
-      log "rm -I ${TO_REMOVE}"
+      log_exc "rm ${TO_REMOVE}"
   fi
 }
 
@@ -84,7 +84,7 @@ remove_empty_folder() {
   TO_REMOVE=$1
   if [[ -d ${TO_REMOVE} ]]; then
       log "Removing empty folder ${TO_REMOVE}"
-      log "rmdir ${TO_REMOVE}"
+      log_exc "rmdir ${TO_REMOVE}"
   fi
 }
 
@@ -92,7 +92,7 @@ remove_folder_recursive() {
   TO_REMOVE=$1
   if [[ -d ${TO_REMOVE} ]]; then
       log "Removing folder recursively ${TO_REMOVE}"
-      log "rm -rf ${TO_REMOVE}"
+      log_exc "rm -rf ${TO_REMOVE}"
   fi
 }
 
@@ -127,15 +127,15 @@ log_exc "cd ${TMP_DIR}"
 # STEP 1: get the encrypted key
 # if not exists or confirm_overwrite
 trap "remove_file '${KEY_FILE}'; error" ERR
-if [[ ! -e ${KEY_FILE} ]]; then
-  log_exc "dsmc retrieve -replace=yes '${RUN_DIR}/${RUN_NAME}.key.gpg' '${KEY_FILE}'"
+if [[ ! -f ${KEY_FILE} ]]; then
+  log_exc "dsmc retrieve -replace=yes ${RUN_DIR}/${RUN_NAME}.key.gpg ${KEY_FILE}"
 else
   log "Found key file '${KEY_FILE}', skipping retrieving key"
 fi
 
 # STEP 2: retrieve run
 trap "remove_file '${RETRIEVED_FILE}'; error" ERR
-if [[ ! -e ${RETRIEVED_FILE} ]]; then
+if [[ ! -f ${RETRIEVED_FILE} ]]; then
   log_exc "dsmc retrieve -replace=yes '${RESTORE_FILE}' '${RETRIEVED_FILE}'"
 else
   log "Found run file '${RETRIEVED_FILE}', skipping retrieving run"
@@ -143,7 +143,7 @@ fi
 
 # STEP 3: decrypt run
 trap "remove_file '${DECRYPTED_FILE}'; error" ERR
-if [[ ! -e ${DECRYPTED_FILE} ]]; then
+if [[ ! -f ${DECRYPTED_FILE} ]]; then
   log "gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase <NOT-SHOWN> --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
   gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "'${PASSPHRASE}'" --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}
 else
@@ -152,30 +152,29 @@ fi
 
 # STEP 4: decompress run
 trap "remove_folder_recursive '${RUN_NAME}'; error" ERR
-if [[ ! -e ${RUN_NAME} ]]; then
+if [[ ! -d ${RUN_NAME} ]]; then
   log_exc "tar xf ${DECRYPTED_FILE} --exclude='RTAComplete.txt' --exclude='demuxstarted.txt' --exclude='Thumbnail_Images'"
 else
   log "Found decompressed run folder '${RUN_NAME}', skipping decompressing run"
 fi
 
+trap error ERR
+
 if [[ ${DEST_SERVER} == 'localhost' ]]; then
 
   # STEP 5: rsync run
-  trap error ERR
-  log_exc "rsync -r --progress ${RUN_NAME} ${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+  log_exc "mkdir -p ${DEST_DIR}; mv ${RUN_NAME} $_"
 
   # STEP 6: mark as finished
   log_exc "touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt"
 else
   # STEP 5: rsync run
-  log_exc "rsync -r --progress ${RUN_NAME} hiseq.clinical@$DEST_SERVER:${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+  log_exc "rsync -r ${RUN_NAME} hiseq.clinica@$DEST_SERVER:${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
 
   # STEP 6: mark as finished
-  log_exc "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt'"
+  log_exc "ssh $DEST_SERVER touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt"
 fi
 
 log "finished retrieval, decryption and decompression!"
 
 cleanup
-
-}
