@@ -163,7 +163,8 @@ trap error ERR
 if [[ ${DEST_SERVER} == 'localhost' ]]; then
 
   # STEP 5: rsync run
-  log_exc "mkdir -p ${DEST_DIR}; mv ${RUN_NAME} $_"
+  log_exc "mkdir -p ${DEST_DIR}"
+  log_exc "mv ${RUN_NAME} ${DEST_DIR}"
 
   # STEP 6: mark as finished
   log_exc "touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt"
