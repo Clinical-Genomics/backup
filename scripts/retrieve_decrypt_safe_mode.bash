@@ -144,7 +144,8 @@ fi
 # STEP 3: decrypt run
 trap "remove_file '${DECRYPTED_FILE}'; error" ERR
 if [[ ! -e ${DECRYPTED_FILE} ]]; then
-  log_exc "time gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase '$PASSPHRASE' --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
+  log "time gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase <NOT-SHOWN> --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
+  time gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "'${$PASSPHRASE}'" --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}
 else
   log "Found decrypted run file '${DECRYPTED_FILE}', skipping gpg decrypting run"
 fi
