@@ -144,8 +144,8 @@ fi
 # STEP 3: decrypt run
 trap "remove_file '${DECRYPTED_FILE}'; error" ERR
 if [[ ! -e ${DECRYPTED_FILE} ]]; then
-  log "time gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase <NOT-SHOWN> --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
-  time gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "'${$PASSPHRASE}'" --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}
+  log "gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase <NOT-SHOWN> --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
+  gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "'${$PASSPHRASE}'" --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}
 else
   log "Found decrypted run file '${DECRYPTED_FILE}', skipping gpg decrypting run"
 fi
@@ -153,7 +153,7 @@ fi
 # STEP 4: decompress run
 trap "remove_folder_recursive '${RUN_NAME}'; error" ERR
 if [[ ! -e ${RUN_NAME} ]]; then
-  log_exc "time tar xf ${DECRYPTED_FILE} --exclude='RTAComplete.txt' --exclude='demuxstarted.txt' --exclude='Thumbnail_Images'"
+  log_exc "tar xf ${DECRYPTED_FILE} --exclude='RTAComplete.txt' --exclude='demuxstarted.txt' --exclude='Thumbnail_Images'"
 else
   log "Found decompressed run folder '${RUN_NAME}', skipping decompressing run"
 fi
@@ -162,13 +162,13 @@ if [[ ${DEST_SERVER} == 'localhost' ]]; then
 
   # STEP 5: rsync run
   trap error ERR
-  log_exc "time rsync -r --progress ${RUN_NAME} ${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+  log_exc "rsync -r --progress ${RUN_NAME} ${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
 
   # STEP 6: mark as finished
   log_exc "touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt"
 else
   # STEP 5: rsync run
-  log_exc "time rsync -r --progress ${RUN_NAME} hiseq.clinical@$DEST_SERVER:${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
+  log_exc "rsync -r --progress ${RUN_NAME} hiseq.clinical@$DEST_SERVER:${DEST_DIR} --partial-dir=${DEST_DIR}.partial --delay-updates"
 
   # STEP 6: mark as finished
   log_exc "ssh $DEST_SERVER 'touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt'"
