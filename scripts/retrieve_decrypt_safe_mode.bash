@@ -153,7 +153,7 @@ fi
 # STEP 4: decompress run
 trap "remove_folder_recursive '${RUN_NAME}'; error" ERR
 if [[ ! -d ${RUN_NAME} ]]; then
-  log_exc "tar xf ${DECRYPTED_FILE} --exclude='RTAComplete.txt' --exclude='demuxstarted.txt' --exclude='Thumbnail_Images'"
+  log_exc "tar xf ${DECRYPTED_FILE} --exclude=RTAComplete.txt --exclude=demuxstarted.txt --exclude=Thumbnail_Images"
 else
   log "Found decompressed run folder '${RUN_NAME}', skipping decompressing run"
 fi
