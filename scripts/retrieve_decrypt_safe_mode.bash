@@ -74,7 +74,7 @@ show_dsmc_errors() {
 
 remove_file() {
   TO_REMOVE=$1
-  if [[ -e ${TO_REMOVE} ]]; then
+  if [[ -f ${TO_REMOVE} ]]; then
       log "Removing file ${TO_REMOVE}"
       log "rm -I ${TO_REMOVE}"
   fi
@@ -82,7 +82,7 @@ remove_file() {
 
 remove_empty_folder() {
   TO_REMOVE=$1
-  if [[ -e ${TO_REMOVE} ]]; then
+  if [[ -d ${TO_REMOVE} ]]; then
       log "Removing empty folder ${TO_REMOVE}"
       log "rmdir ${TO_REMOVE}"
   fi
@@ -90,7 +90,7 @@ remove_empty_folder() {
 
 remove_folder_recursive() {
   TO_REMOVE=$1
-  if [[ -e ${TO_REMOVE} ]]; then
+  if [[ -d ${TO_REMOVE} ]]; then
       log "Removing folder recursively ${TO_REMOVE}"
       log "rm -rf ${TO_REMOVE}"
   fi
