@@ -3,7 +3,7 @@
 # retrieves and transfers a file from PDC
 
 set -o errexit
-set -o nounset
+# set -o nounset
 set -o pipefail
 set -E
 
