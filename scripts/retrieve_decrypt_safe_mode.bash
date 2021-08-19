@@ -151,7 +151,7 @@ else
 fi
 
 # STEP 4: decompress run
-trap "remove_folder '${RUN_NAME}'; error" ERR
+trap "remove_folder_recursive '${RUN_NAME}'; error" ERR
 if [[ ! -e ${RUN_NAME} ]]; then
   log_exc "time tar xf ${DECRYPTED_FILE} --exclude='RTAComplete.txt' --exclude='demuxstarted.txt' --exclude='Thumbnail_Images'"
 else
