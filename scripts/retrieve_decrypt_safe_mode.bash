@@ -170,6 +170,7 @@ if [[ ${DEST_SERVER} == 'localhost' ]]; then
   log_exc "touch ${DEST_DIR}/${RUN_NAME}/RTAComplete.txt"
 else
   # STEP 5: rsync run
+  log_exc "ssh $DEST_SERVER mkdir -p ${DEST_DIR}"
   log_exc "rsync -r ${RUN_NAME} hiseq.clinical@$DEST_SERVER:${DEST_DIR}"
 
   # STEP 6: mark as finished
