@@ -2,7 +2,7 @@
 
 # retrieves and transfers a file from PDC
 
-set -eu -o pipefail
+set -e -o pipefail
 
 ########
 # VARS #
