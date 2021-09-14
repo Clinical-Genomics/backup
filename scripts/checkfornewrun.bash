@@ -2,7 +2,7 @@
 
 set -e
 
-VERSION=3.14.1
+VERSION=3.14.2
 
 ########
 # VARS #
