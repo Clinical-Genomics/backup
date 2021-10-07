@@ -78,8 +78,8 @@ RUN_ARCHIVE=${ON_PDC_RUN[${#ON_PDC_RUN[@]}-1]}
 
 RUN=$(basename ${RUN_ARCHIVE%*.tar.gz.gpg})
 
-log "bash ${SCRIPT_DIR}/retrieve_decrypt.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}"
-     bash ${SCRIPT_DIR}/retrieve_decrypt.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}
+log "bash ${SCRIPT_DIR}/retrieve_decrypt_safe_mode.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}"
+     bash ${SCRIPT_DIR}/retrieve_decrypt_safe_mode.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}
 
 log "rsync -r ${DEST_DIR_NAS}/${RUN} ${DEST_SERVER}:${DEST_DIR} --exclude RTAComplete.txt --exclude demuxstarted.txt --exclude Thumbnail_Images"
      rsync -r ${DEST_DIR_NAS}/${RUN} ${DEST_SERVER}:${DEST_DIR} --exclude RTAComplete.txt --exclude demuxstarted.txt --exclude Thumbnail_Images
