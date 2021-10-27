@@ -126,10 +126,10 @@ MAX_AGE=720
 if [[ ! -f ${SEMAPHORE} ]]; then
   log_exc touch ${SEMAPHORE}
 elif [[ $(find ${SEMAPHORE} -maxdepth 0 -cmin -${MAX_AGE}) ]]; then
-  log "Semaphore file ${SEMAPHORE} exists, quiting"
+  log "Semaphore file '${SEMAPHORE}' exists, quiting"
   exit 0
 else
-  log "Semaphore file ${SEMAPHORE} exists but is older than ${MAX_AGE} minutes, quiting with error status"
+  log "Semaphore file '${SEMAPHORE}' exists but is older than ${MAX_AGE} minutes, quiting with error status"
   exit 1
 fi
 
