@@ -159,8 +159,8 @@ fi
 trap "remove_file ${DECRYPTED_FILE}; error" ERR
 if [[ ! -f ${DECRYPTED_FILE} ]]; then
   TMP_DECRYPTED_FILE=${DECRYPTED_FILE}.tmp
-  log "gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase <NOT-SHOWN> --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
-  gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "${PASSPHRASE}" --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}
+  log "gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase <NOT-SHOWN> --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${TMP_DECRYPTED_FILE}"
+  gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "${PASSPHRASE}" --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${TMP_DECRYPTED_FILE}
   mv ${TMP_DECRYPTED_FILE} ${DECRYPTED_FILE}
 else
   log "Found decrypted run file ${DECRYPTED_FILE}, skipping gpg decrypting run"
