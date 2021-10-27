@@ -127,7 +127,9 @@ log_exc cd ${TMP_DIR}
 # if not exists or confirm_overwrite
 trap "remove_file ${KEY_FILE}; error" ERR
 if [[ ! -f ${KEY_FILE} ]]; then
-  log_exc dsmc retrieve -replace=yes ${RUN_DIR}/${RUN_NAME}.key.gpg ${KEY_FILE}
+  TMP_KEY=${KEY_FILE}.tmp
+  log_exc dsmc retrieve -replace=yes ${RUN_DIR}/${RUN_NAME}.key.gpg ${TMP_KEY}
+  mv ${TMP_KEY} ${KEY_FILE}
 else
   log "Found key file ${KEY_FILE}, skipping retrieving key"
 fi
@@ -135,7 +137,9 @@ fi
 # STEP 2: retrieve run
 trap "remove_file ${RETRIEVED_FILE}; error" ERR
 if [[ ! -f ${RETRIEVED_FILE} ]]; then
-  log_exc dsmc retrieve -replace=yes ${RESTORE_FILE} ${RETRIEVED_FILE}
+  TMP_RETRIEVED_FILE=${RETRIEVED_FILE}.tmp
+  log_exc dsmc retrieve -replace=yes ${RESTORE_FILE} ${TMP_RETRIEVED_FILE}
+  mv ${TMP_RETRIEVED_FILE} ${RETRIEVED_FILE}
 else
   log "Found run file ${RETRIEVED_FILE}, skipping retrieving run"
 fi
@@ -143,8 +147,10 @@ fi
 # STEP 3: decrypt run
 trap "remove_file ${DECRYPTED_FILE}; error" ERR
 if [[ ! -f ${DECRYPTED_FILE} ]]; then
+  TMP_DECRYPTED_FILE=${DECRYPTED_FILE}.tmp
   log "gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase <NOT-SHOWN> --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}"
   gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "${PASSPHRASE}" --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${DECRYPTED_FILE}
+  mv ${TMP_DECRYPTED_FILE} ${DECRYPTED_FILE}
 else
   log "Found decrypted run file ${DECRYPTED_FILE}, skipping gpg decrypting run"
 fi
@@ -152,7 +158,13 @@ fi
 # STEP 4: decompress run
 trap "remove_folder_recursive ${RUN_NAME}; error" ERR
 if [[ ! -d ${RUN_NAME} ]]; then
-  log_exc tar xf ${DECRYPTED_FILE} --exclude=RTAComplete.txt --exclude=demuxstarted.txt --exclude=Thumbnail_Images
+  TMP_RUN_NAME=${RUN_NAME}.tmp
+  if [[ ! -d ${TMP_RUN_NAME} ]]; then
+    log_exc mkdir ${TMP_RUN_NAME}
+  fi
+
+  log_exc tar -xf ${DECRYPTED_FILE} --exclude=RTAComplete.txt --exclude=demuxstarted.txt --exclude=Thumbnail_Images -C ${TMP_RUN_NAME}
+  mv ${TMP_RUN_NAME}/${RUN_NAME} ${RUN_NAME}
 else
   log "Found decompressed run folder ${RUN_NAME}, skipping decompressing run"
 fi
