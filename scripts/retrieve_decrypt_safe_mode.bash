@@ -176,6 +176,7 @@ if [[ ! -d ${RUN_NAME} ]]; then
 
   log_exc tar -xf ${DECRYPTED_FILE} --exclude=RTAComplete.txt --exclude=demuxstarted.txt --exclude=Thumbnail_Images -C ${TMP_RUN_NAME}
   mv ${TMP_RUN_NAME}/${RUN_NAME} ${RUN_NAME}
+  remove_empty_folder ${TMP_RUN_NAME}
 else
   log "Found decompressed run folder ${RUN_NAME}, skipping decompressing run"
 fi
