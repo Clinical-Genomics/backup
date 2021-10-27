@@ -102,6 +102,7 @@ remove_folder_recursive() {
 error() {
   log "Something went wrong! leaving files for manual handling:"
   list_files
+  remove_file ${SEMAPHORE}
 }
 
 list_files() {
@@ -111,13 +112,7 @@ list_files() {
   done
 }
 
-#########
-# TRAPS #
-#########
-
-trap error ERR
-
-########
+#######
 # MAIN #
 ########
 
@@ -127,18 +122,22 @@ if [[ ! -d ${TMP_DIR} ]]; then
 fi
 log_exc cd ${TMP_DIR}
 
+MAX_AGE=720
 if [[ ! -f ${SEMAPHORE} ]]; then
   log_exc touch ${SEMAPHORE}
-else
+elif [[ $(find ${SEMAPHORE} -maxdepth 0 -cmin -${MAX_AGE}) ]]; then
   log "Semaphore file ${SEMAPHORE} exists, quiting"
   exit 0
+else
+  log "Semaphore file ${SEMAPHORE} exists but is older than ${MAX_AGE} minutes, quiting with error status"
+  exit 1
 fi
 
 # STEP 1: get the encrypted key
 # if not exists or confirm_overwrite
-trap "remove_file ${KEY_FILE}; error" ERR
+TMP_KEY=${KEY_FILE}.tmp
+trap "remove_file ${TMP_KEY}; error" ERR
 if [[ ! -f ${KEY_FILE} ]]; then
-  TMP_KEY=${KEY_FILE}.tmp
   log_exc dsmc retrieve -replace=yes ${RUN_DIR}/${RUN_NAME}.key.gpg ${TMP_KEY}
   mv ${TMP_KEY} ${KEY_FILE}
 else
@@ -146,9 +145,9 @@ else
 fi
 
 # STEP 2: retrieve run
-trap "remove_file ${RETRIEVED_FILE}; error" ERR
+TMP_RETRIEVED_FILE=${RETRIEVED_FILE}.tmp
+trap "remove_file ${TMP_RETRIEVED_FILE}; error" ERR
 if [[ ! -f ${RETRIEVED_FILE} ]]; then
-  TMP_RETRIEVED_FILE=${RETRIEVED_FILE}.tmp
   log_exc dsmc retrieve -replace=yes ${RESTORE_FILE} ${TMP_RETRIEVED_FILE}
   mv ${TMP_RETRIEVED_FILE} ${RETRIEVED_FILE}
 else
@@ -156,9 +155,9 @@ else
 fi
 
 # STEP 3: decrypt run
-trap "remove_file ${DECRYPTED_FILE}; error" ERR
+TMP_DECRYPTED_FILE=${DECRYPTED_FILE}.tmp
+trap "remove_file ${TMP_DECRYPTED_FILE}; error" ERR
 if [[ ! -f ${DECRYPTED_FILE} ]]; then
-  TMP_DECRYPTED_FILE=${DECRYPTED_FILE}.tmp
   log "gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase <NOT-SHOWN> --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${TMP_DECRYPTED_FILE}"
   gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "${PASSPHRASE}" --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${TMP_DECRYPTED_FILE}
   mv ${TMP_DECRYPTED_FILE} ${DECRYPTED_FILE}
@@ -167,9 +166,9 @@ else
 fi
 
 # STEP 4: decompress run
-trap "remove_folder_recursive ${RUN_NAME}; error" ERR
+TMP_RUN_NAME=${RUN_NAME}.tmp
+trap "remove_folder_recursive ${TMP_RUN_NAME}/${RUN_NAME}; error" ERR
 if [[ ! -d ${RUN_NAME} ]]; then
-  TMP_RUN_NAME=${RUN_NAME}.tmp
   if [[ ! -d ${TMP_RUN_NAME} ]]; then
     log_exc mkdir ${TMP_RUN_NAME}
   fi
