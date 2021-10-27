@@ -27,6 +27,7 @@ TMP_DIR="${RUN_NAME}.TMP"
 KEY_FILE="${RUN_NAME}.key.gpg"
 RETRIEVED_FILE="./${RUN_FILE}"
 DECRYPTED_FILE="${RUN_FILE%%.gpg}"
+SEMAPHORE="running"
 
 #############
 # FUNCTIONS #
@@ -62,6 +63,9 @@ cleanup() {
 
     log "removing decompressed folder ${RUN_NAME}"
     log_exc remove_folder_recursive ${RUN_NAME}
+
+    log "removing semaphore file " ${SEMAPHORE}
+    log_exc remove_file ${SEMAPHORE}
 
     log_exc remove_empty_folder ${START_DIR}/${TMP_DIR}
     log "finished!"
@@ -122,6 +126,13 @@ if [[ ! -d ${TMP_DIR} ]]; then
   log_exc mkdir ${TMP_DIR}
 fi
 log_exc cd ${TMP_DIR}
+
+if [[ ! -f ${SEMAPHORE} ]]; then
+  log_exc touch ${SEMAPHORE}
+else
+  log "Semaphore file ${SEMAPHORE} exists, quiting"
+  exit 0
+fi
 
 # STEP 1: get the encrypted key
 # if not exists or confirm_overwrite
