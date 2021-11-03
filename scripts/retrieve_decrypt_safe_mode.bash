@@ -3,6 +3,7 @@
 # retrieves and transfers a file from PDC
 
 set -o errexit
+set -o nounset
 set -o pipefail
 set -E
 
@@ -28,6 +29,8 @@ KEY_FILE="${RUN_NAME}.key.gpg"
 RETRIEVED_FILE="./${RUN_FILE}"
 DECRYPTED_FILE="${RUN_FILE%%.gpg}"
 SEMAPHORE="running"
+
+already_running_return_value=210
 
 #############
 # FUNCTIONS #
@@ -127,7 +130,7 @@ if [[ ! -f ${SEMAPHORE} ]]; then
   log_exc touch ${SEMAPHORE}
 elif [[ $(find ${SEMAPHORE} -maxdepth 0 -cmin -${MAX_AGE}) ]]; then
   log "Semaphore file '${TMP_DIR}/${SEMAPHORE}' exists. Fetching of flowcell already in progress. Quiting"
-  exit 0
+  exit ${already_running_return_value}
 else
   log "Semaphore file '${TMP_DIR}/${SEMAPHORE}' exists but is older than ${MAX_AGE} minutes, quiting with error status"
   exit 1
