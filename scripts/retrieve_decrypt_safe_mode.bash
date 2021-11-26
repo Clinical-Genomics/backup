@@ -159,7 +159,7 @@ TMP_DECRYPTED_FILE=${DECRYPTED_FILE}.tmp
 set +e # temporarily suspend exiting on any error
 if [[ ! -f ${DECRYPTED_FILE} ]]; then
   log "gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase <NOT-SHOWN> --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${TMP_DECRYPTED_FILE}"
-  gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "${PASSPHRASE}" --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${TMP_DECRYPTED_FILE}; EXIT_STATUS=$?
+  EXIT_STATUS=gpg --cipher-algo aes256 --passphrase-file <(gpg --cipher-algo aes256 --passphrase "${PASSPHRASE}" --batch --decrypt ${KEY_FILE}) --batch --decrypt ${RUN_FILE} > ${TMP_DECRYPTED_FILE}
   if [ ${EXIT_STATUS} -ne 0 ] && [ ${EXIT_STATUS} -ne 2 ]; then
     log "Exiting decryption with status code ${EXIT_STATUS}!"
     remove_file ${TMP_DECRYPTED_FILE}
