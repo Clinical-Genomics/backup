@@ -78,7 +78,7 @@ RUN_ARCHIVE=${ON_PDC_RUN[${#ON_PDC_RUN[@]}-1]}
 
 RUN=$(basename ${RUN_ARCHIVE%*.tar.*.gpg})
 
-CMD="bash ${SCRIPT_DIR}/retrieve_decrypt.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}"
+CMD="bash ${SCRIPT_DIR}/retrieve_decrypt_safe_mode.bash ${RUN_ARCHIVE} ${DEST_SERVER_NAS} ${DEST_DIR_NAS}"
 log $CMD
 $CMD
 

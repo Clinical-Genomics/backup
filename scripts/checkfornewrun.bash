@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 
-VERSION=3.13.0
+VERSION=3.14.3
 
 ########
 # VARS #
