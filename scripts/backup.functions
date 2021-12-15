@@ -143,11 +143,3 @@ are_runs_backuped() {
         $(is_run_backuped "${RUN}" "${ON_PDC_FILE}")
     done
 }
-
-########
-# MAIN #
-########
-
-#for RUN in ${BACKUP_DIR}/*; do
-#    $(is_run_backuped "${RUN}" "${ON_PDC_FILE}")
-#done
