@@ -7,8 +7,13 @@ set -Eeuo pipefail
 #############
 
 log() {
-    NOW=$(date +"%Y%m%d%H%M%S")
-    echo "[${NOW}] $@"
+    NOW=$(date +"%Y-%m-%d %H:%M:%S")
+    echo "`echo $'\n '`[${NOW}] $@"
+}
+
+log_exc() {
+    log "$@"
+    "$@"
 }
 
 finish() {
@@ -18,6 +23,7 @@ finish() {
     if [[ -f ${PASSPHRASEFILE}.gpg ]]; then
         rm ${PASSPHRASEFILE}.gpg
     fi
+
 trap finish ERR EXIT
 
 ########
@@ -41,27 +47,19 @@ chmod a-rwx,u+rw ${PASSPHRASEFILE}
 cd ${INDIR}
 
 # can take some time when there is not a lot of entropy
-CMD="gpg --gen-random 2 256 > ${PASSPHRASEFILE}"
-log $CMD
-$CMD
+log gpg --gen-random 2 256 > ${PASSPHRASEFILE}
+gpg --gen-random 2 256 > ${PASSPHRASEFILE}
 
 # asymmetrically encrypt the passphrase file
-CMD="gpg -e -r 'Kenny Billiau' -o ${PASSPHRASEFILE}.gpg ${PASSPHRASEFILE}"
-log $CMD
-$CMD
-ls -l ${PASSPHRASEFILE}*
+log_exc gpg -e -r "Kenny Billiau" -o ${PASSPHRASEFILE}.gpg ${PASSPHRASEFILE}
+log_exc ls -l ${PASSPHRASEFILE}*
 
-# previous step can take a long while, check if the rundir still is there
-if [[ ! -d ${RUN} ]]; then
-    >&2 echo "${RUN} is gone - aborting"
-    exit 1
-fi
+# TAR with zstd
+log_exc tar -cP --use-compress-program='zstd -19 -T0' -f ${OUTDIR}/${RUN}.tar.zstd ${RUN}
 
-# TAR with zstd | GPG
-CMD = "tar -c -I='zstd -19 -T0' -f - ${RUN} | gpg --symmetric --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch --compress-algo none -o ${OUTDIR}/${RUN}.tar.zstd.gpg"
-log $CMD
-$CMD
+# GPG
+log_exc gpg --symmetric --cipher-algo aes256 --passphrase-file ${PASSPHRASEFILE} --batch --compress-algo none -o ${OUTDIR}/${RUN}.tar.zstd.gpg ${OUTDIR}/${RUN}.tar.zstd
 
-mv ${PASSPHRASEFILE}.gpg ${OUTDIR}/${RUN}.key.gpg
+log_exc mv ${PASSPHRASEFILE}.gpg ${OUTDIR}/${RUN}.key.gpg
 cd -
 log "Finished"
