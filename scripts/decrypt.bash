@@ -11,7 +11,10 @@ fi
 
 RUNPATH=${1?'Please provide fully qualified path to the archive'}
 REMOTE=$2
-REMOTE_DIR=$3
+
+if [[ ${#@} -eq 3 ]]; then
+  REMOTE_DIR=$3
+fi
 
 RUNDIR=$(dirname $RUNPATH)
 RUN=$(basename $RUNPATH)
