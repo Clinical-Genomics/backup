@@ -12,6 +12,7 @@ INDIR=${1?'Need a directory to monitor'}
 OUTDIR=${2-/home/hiseq.clinical/ENCRYPT}
 REMOTE_OUTDIR=${3-rasta:/mnt/hds/proj/bioinfo/TO_PDC}
 MVDIR=/home/hiseq.clinical/BACKUP
+NAS=$(hostname)
 EMAILS=clinical-logwatch@scilifelab.se
 
 SCRIPTDIR=$(dirname $0)
@@ -30,7 +31,6 @@ log() {
 #########
 
 finish() {
-    NAS=$(hostname)
     echo "Error while backing up ${RUN} on ${NAS}" | mail -s "Error while backing up ${RUN} on ${NAS}" ${EMAILS}
 }
 trap finish ERR
