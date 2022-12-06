@@ -39,8 +39,15 @@ trap finish ERR
 # MAIN #
 ########
 
-if pgrep rsync || pgrep -x gpg; then
-    log "Skipping archiving - Other runs are syncing"
+if pgrep -x gpg; then
+    log "Skipping archiving - Other runs are undergoing encryption syncing"
+    exit
+fi
+
+PERCENTAGE_STORAGE_USED=$(df -h /home --output=pcent | awk '$0!~/Use/ {print $0}' | sed 's/\s//g' | sed 's/[%]//g')
+
+if [ ${PERCENTAGE_STORAGE_USED} -gt 75 ]; then
+    log "Skipping archiving - Storage is almost full"
     exit
 fi
 
