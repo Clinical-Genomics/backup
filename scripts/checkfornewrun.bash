@@ -48,6 +48,7 @@ PERCENTAGE_STORAGE_USED=$(df -h /home --output=pcent | awk '$0!~/Use/ {print $0}
 
 if [ ${PERCENTAGE_STORAGE_USED} -gt 75 ]; then
     log "Skipping archiving - Storage is almost full"
+    echo "Skipping archiving - Storage is almost full on ${NAS} - ${PERCENTAGE_STORAGE_USED}%" | mail -s "Skipping archiving - Storage is almost full on ${NAS}" ${EMAILS}
     exit
 fi
 
